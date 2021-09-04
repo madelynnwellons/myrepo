@@ -1,21 +1,215 @@
 ---
-title: "Wellons HW2"
-author: Madelynn Wellons
-date: 8/31/21
-output: html_notebook
+title: "Wellons HW2 Part 1"
+author: "Madelynn Wellons"
+date: "8/31/21"
+output:
+  html_document:
+    df_print: paged
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+PS02- Data Visualization
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+Exercise 1:
+
+First we will load the three packages we will be using in this problem set.
 
 ```{r}
-plot(cars)
+library(dplyr)
+library(ggplot2)
+library(readr)
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+Now we will load the data, which is on a google doc (North Carolina data on births).
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+```{r}
+nc <- read_csv("https://docs.google.com/spreadsheets/d/e/2PACX-1vTm2WZwNBoQdZhMgot7urbtu8eG7tzAq-60ZJsQ_nupykCAcW0OXebVpHksPWyR4x8xJTVQ8KAulAFS/pub?gid=202410847&single=true&output=csv")
+```
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+We will now take a quick look at the data using the glimpse command.
 
+```{r}
+glimpse(nc)
+```
+
+R is considering the variable 'habit' to be a character/text variable, while visits is listed as "dbl" which stands for double class/double-precision floating point number (which, from my understanding, is a type of numerical variable where the responses are all real numbers).
+
+Exercise 2:
+
+First we will create a scatterplot using the dataset we imported, graphing the variables 'weeks' and 'weight'.
+
+```{r}
+ggplot(data = nc, aes(x = weeks, y = weight)) +
+  geom_point()
+```
+
+We will now add axis labels and a title to this scatterplot using the 'labs' layer.
+
+```{r}
+ggplot(data = nc, aes(x = weeks, y = weight)) +
+  geom_point() +
+  labs(x = "Length of pregnancy (in weeks)", y = "Birth weight of baby (lbs)", title = "Relationship between pregnancy duration and newborn weight")
+```
+
+These variables seem to have a positive relationship (as one variable increases in value, the other one does as well).
+
+Exercise 3:
+
+I will now create a new scatterplot, now comparing 'weeks' and 'gained'.
+
+```{r}
+ggplot(data = nc, aes(x = weeks, y = gained)) +
+  geom_point() +
+  labs(x = "Length of pregnancy (in weeks)", y = "Weight gained by mother during pregnancy (lbs)", title = "Relationship between prenancy duration and weight gained by mother")
+```
+
+Exercise 4:
+
+A- By adding the argument "color = premie", all datapoints that are classified as premie (not full term, roughly 36 weeks or under), and it appears to have changed the relationship between the two variables (weeks and maternal weight gain)- while it originally appeared to be a positive relationship, that seems to only be true for the datapoints lablled as premie, as the full term datapoints are all distributed along the y axis fairly equally with no relation to the x axis.
+
+B- There are now three variables on the plot (premie, weeks, and gained).
+
+C- The pregnancy length cutoff for "premie" versus "full term" according to this plot is roughly 37 weeks.
+
+Exercise 5:
+
+I will now create a new scatterplot using the variables mage and weight for the axis, and adding a third variable (gender) via coloring the points on the plot.
+
+```{r}
+ggplot(data = nc, aes(x = mage, y = weight, color = gender)) +
+  geom_point() +
+  labs(x = "Mother's age (in years)", y = "Birth weight of baby (lbs)")
+```
+
+There does not appear to be any strong relationship between a mother's age and the weight of her newborn.
+
+Exercise 6:
+
+First we will create a histogram to analyze the distribution of the variable "weeks".
+
+```{r}
+ggplot(data = nc, aes(x = weeks)) +
+  geom_histogram()
+```
+
+We will now adjust the binwidth and the colors of the graph.
+
+```{r}
+ggplot(data = nc, aes(x = weeks)) +
+  geom_histogram(binwidth = 1, color = "white", fill = "steelblue")
+```
+
+A- The frequency of the variable 'weeks' in each bin/value is what is being counted (e.g. if there are 5 cases in the dataset where the weeks variable equals 30, then the y axis 'count' is going to be counting those 5 cases).
+
+B- The average length of pregnancies in weeks according to this graph seems to be roughly 39 weeks.
+
+C- If we changed the binwidth to 100, there would only be one bin and that bin would have all 800 cases in it.
+
+Exercise 7:
+
+I will now create a histogram of the variable 'weight'.
+
+```{r}
+ggplot(data = nc, aes(x = weight)) +
+  geom_histogram() +
+  labs(x = "Birth weight of newborns (lbs)", y = "count", title = "North Carolina Birth Weights")
+```
+
+I am getting a message from R Studio warning me about how it has selected an automatic value for the binwidth, but I think that this automatic value shows the distribution fairly well so I will leave it as is.
+
+Exercise 8:
+
+First I will use the facet command to create two stacked histograms, utilizing the variables weeks and mature.
+
+```{r}
+ggplot(data = nc, aes(x = weeks)) +
+  geom_histogram(binwidth = 1, color = "white", fill = "steelblue") +
+  facet_wrap(~ mature, ncol = 1)
+```
+
+Now that I have practiced with that example, I will make two stacked histograms using the variable weight and split then using the variable gender.
+
+```{r}
+ggplot(data = nc, aes(x = weight)) +
+  geom_histogram(binwidth = 0.5, color = "white", fill = "steelblue") +
+  facet_wrap(~ gender, ncol = 1)
+```
+
+Since the mode of the male histogram is higher than the female histogram, and overall the other observations in the male histogram seem higher than the female, the male gener appears to have a slightly larger average birth weight.
+
+Exercise 9:
+
+First I will practice by making a boxplot with the variables gender and gained.
+
+```{r}
+ggplot(data = nc, aes(x = gender, y = gained)) +
+  geom_boxplot(fill = "sienna")
+```
+
+
+Now I will make a boxplot using the variable gained, splitting by the variable mature, as well as adding axis labels and a title.
+
+```{r}
+ggplot(data = nc, aes(x = mature, y = gained)) +
+  geom_boxplot(fill = "sienna") +
+  labs(x = "Mature status of mothers", y = "Maternal weight gain (lbs)", title = "Relationship between maturity status of mothers and maternal weight gain")
+```
+
+The median weight gain appears to be slightly higher for younger moms (just a bit above 30, while older moms' median is around 29).
+
+Exercise 10:
+
+I will now create a boxplot using the variable weeks and separating it by variable habit.
+
+```{r}
+ggplot(data = nc, aes(x = habit, y = weeks)) +
+  geom_boxplot(fill = "sienna")
+```
+
+The smoking group has a greater spread for the variable weeks; particularly in the 25-50th percentile (the bottom half of the "box") the spread is roughly double the size of that on the nonsmoker plot.
+
+Exercise 11:
+
+For this exercise, since we are only utilizing one variable and we are attempting to examine the symmetry of its' frequencies, we will be making a histogram. Below I will input the code to create a histogram where the x axis will be the fage variable and the y axis will be the 'count'.
+
+```{r}
+ggplot(data = nc, aes(x = fage)) +
+  geom_histogram()
+```
+
+In order to better determine if this is symmetrical or has a skew (it appears to be right-skewed, but a few adjustments to the data visualization should make it more clear), I will adjust the binwidth to 2 since currently, at 1, there is a bit too much variation near the middle of the graph that is not assisting us with determining the shape of this variable- in addition, I will add color and borders.
+
+```{r}
+ggplot(data = nc, aes(x = fage)) +
+  geom_histogram(binwidth = 2, color = "white", fill = "steelblue")
+```
+
+Now with these adjustments we can more clearly see that the distribution has a "tail" on the right, or is a right-skewed distribution.
+
+Exercise 12:
+
+Since we are comparing medians for two different groups on the same variable, the best way to visualize this data would be in a boxplot given the line in boxplot that shows the exact median for each group. Below is the boxplot, with the x axis/groups determined by the variable whitemom and the y axis weight.
+
+```{r}
+ggplot(data = nc, aes(x = whitemom, y = weight)) +
+  geom_boxplot(fill = "sienna")
+```
+
+Comparing the two boxplots, the median birth weight of babies in this dataset is larger for white moms compared to non-white moms (roughly 7.5 lbs versus about 6.8 lbs).
+
+Exercise 13:
+
+Since we are trying to examine if there is a positive or negative relationship between two numerical variables, a scatterplot is likely the best way to visualize this data. Below is a scatterplot, with mage on the x axis and weeks on the y axis.
+
+```{r}
+ggplot(data = nc, aes(x = mage, y = weeks)) +
+  geom_point()
+```
+
+This graph is a bit difficult to read since there are so many overlapping points- I will try it again using the geom_jitter command.
+
+```{r}
+ggplot(data = nc, aes(x = mage, y = weeks)) +
+  geom_jitter()
+```
+
+While this graph is a bit easier to understand, it does appear that there is not a relationship between a mother's age and the duration of pregnancy in this dataset (or at the very least, if there is it is very weak) as there is  a large cluster that does not appear to decrease as the mage variable value increases.
