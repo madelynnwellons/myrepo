@@ -59,7 +59,8 @@ I will now create a new scatterplot, now comparing 'weeks' and 'gained'.
 ```{r}
 ggplot(data = nc, aes(x = weeks, y = gained)) +
   geom_point() +
-  labs(x = "Length of pregnancy (in weeks)", y = "Weight gained by mother during pregnancy (lbs)", title = "Relationship between prenancy duration and weight gained by mother")
+  labs(x = "Length of pregnancy (in weeks)", y = "Weight gained by mother during pregnancy (lbs)", title = "Relationship between pregnancy duration and weight gained by mother") +
+  theme(plot.title = element_text(size = 10))
 ```
 
 Exercise 4:
@@ -151,7 +152,8 @@ Now I will make a boxplot using the variable gained, splitting by the variable m
 ```{r}
 ggplot(data = nc, aes(x = mature, y = gained)) +
   geom_boxplot(fill = "sienna") +
-  labs(x = "Mature status of mothers", y = "Maternal weight gain (lbs)", title = "Relationship between maturity status of mothers and maternal weight gain")
+  labs(x = "Mature status of mothers", y = "Maternal weight gain (lbs)", title = "Relationship between maturity status of mothers and maternal weight gain") +
+  theme(plot.title = element_text(size = 10))
 ```
 
 The median weight gain appears to be slightly higher for younger moms (just a bit above 30, while older moms' median is around 29).
