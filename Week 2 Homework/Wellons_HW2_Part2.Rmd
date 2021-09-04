@@ -1,0 +1,182 @@
+---
+title: "Wellons HW2 Part 2"
+author: "Madelynn Wellons"
+date: "9/4/21"
+output:
+  html_document:
+    df_print: paged
+---
+
+PS03
+
+Exercise 1:
+
+First I will load the packages needed for the problem set.
+
+```{r}
+library(ggplot2)
+library(dplyr)
+```
+
+Now I will load and glimpse at the data we will be using in this problem set.
+
+```{r}
+data(txhousing)
+glimpse(txhousing)
+```
+
+I am looking at the data via the environment pane, and the last city listed in the data set is Wichita Falls. 
+
+Exercise 2:
+
+First I will look at the variable descriptions for this texas housing dataset.
+
+```{r}
+?txhousing
+```
+
+The listings variable in this dataset is described as "total active listings", which would presumably be the total active housing listings in the corresponding city.
+
+Basic Syntax/Data Wrangling Review:
+
+select function-
+```{r}
+txhousing |> select(sales, volume)
+txhousing <- txhousing |> select(-date)
+```
+
+filter function-
+```{r}
+austin_12 <- txhousing |> filter(year == 2012, city == "Austin")
+txhousing |> filter(year < 2004, city == "Austin")
+aust_ab <- txhousing |> filter(city == "Austin" | city == "Abilene")
+```
+
+mutate function-
+```{r}
+txhousing <- txhousing |> 
+  mutate(vol_100k = volume/100000)
+```
+
+summarize function-
+```{r}
+austin_12 |> summarize(x_bar_sales = mean(sales),
+                       sd_sales = sd(sales),
+                       min_vol = min(volume),
+                       max_vol = max(volume),
+                       mdn_list = median(listings),
+                       iqr_list = IQR(listings),
+                       sample_size = n())
+```
+
+arrange function:
+```{r}
+austin_12 |> 
+  arrange(desc(volume))
+```
+
+group_by function-
+```{r}
+aust_ab |> group_by(city) |> 
+  summarize(x_bar_sales = mean(sales))
+aust_ab |> group_by(city, month) |> 
+  summarize(x_bar_sales = mean(sales))
+```
+
+Exercise 3:
+
+In order to remove the inventory variable, I will use the select function, similarly to how earlier we removed the date variable using select(-date).
+```{r}
+txhousing <- txhousing |> select(-inventory)
+```
+
+Exercise 4:
+
+I will now create a dataset with only the data from Dallas in the years 2012 and 2013; I will do this using the filter function.
+```{r}
+dallas_sub <- txhousing |> filter(year == 2012 | year == 2013, city == "Dallas")
+View(dallas_sub)
+```
+
+Exercise 5:
+
+I will now use the mutate function to create a column for the percents of sold listings, similarly to how we created the volume_100k column earlier.
+```{r}
+dallas_sub <- dallas_sub |> 
+  mutate(sold_listings = sales/listings * 100)
+```
+
+Exercise 6:
+
+In order to calculate the average of sold_listings per month of the year, we will need to do a few things. First, we will be using the newly created sold_listings variable in the dallas_sub data set. We will then use the group_by function in order to show the set by each month, and then use the summarize function to calculate these values, and we will save these reults in a new data frame (dallas_summary).
+```{r}
+dallas_summary <- dallas_sub |> group_by(month) |> 
+  summarize(av_sold_listings = mean(sold_listings))
+View(dallas_summary)
+```
+
+Exercise 7:
+
+In order to see the month with the largest value of mean sold_listings (highest % of houses sold) in the year 2012, I will use the arrange function. Below you can see that the month with the greater % of houses sold is month 8, or August.
+```{r}
+dallas_summary |> arrange(desc(av_sold_listings))
+```
+
+Exercise 8:
+
+I will now run the code chunk provided.
+```{r}
+txhousing |> 
+  filter(year == 2012 | year == 2013, city == "Dallas") |> 
+  mutate(prct_sold = sales/listings * 100) |> 
+  group_by(month) |> 
+  summarize(mean_prct_sold = mean(prct_sold)) |> 
+  arrange(desc(mean_prct_sold))
+```
+
+This code chunk calculated the mean of the percent of listings sold per month in the years 2012 and 2013 in the city Dallas. The way that code worked was that it first filtered the dataset txhousing to only show the years 2012 and 2013, as well as the city Dallas. Then it created a new variable (prct_sold) with the mutate function, taking a formula using two existing variables to create a new one. Then it grouped the dataset by months, and created a summary variable (mean_prct_sold) by taking the mean of the prct_sold variable, and then used the arrange function to list the mean_prct_sold variable by month in descending order.
+
+Exercise 9:
+
+In order to determine the city with the fewest houses listed for sale in a specific month and year, first we will filter the dataset txhousing to include only the values for January 2015 (I will save this data in a new data frame to make it easier to work with).
+```{r}
+jan2015_txhousing <- txhousing |> 
+  filter(year == 2015, month == 1)
+View(jan2015_txhousing)
+```
+
+Now that we have filtered this dataframe, we will use the group_by function to ensure that the dataset is being grouped by cities, and then use the arrange function to show the listings variable in ascending order (to see the lowest value on the top).
+```{r}
+jan2015_txhousing |> group_by(city) |> 
+  arrange(listings)
+```
+
+We can see that the city with the fewest houses listed for sale was San Marcos with 85 listings.
+
+Exercise 10:
+
+In order to determine which month had the most houses sold in Texas in 2012, first we will filter the dataset to show only 2012 data (creating a new dataframe to make the rest of the code simpler/ more straightforward).
+```{r}
+txhousing2012 <- txhousing |> 
+  filter(year == 2012)
+```
+
+Now that we have this dataframe set, we will need to group this data by month; then we will use the sum function to create the total_sales variable that should show the sales across all cities, and then arrange it in descending order to show the month where the most houses were sold.
+```{r}
+txhousing2012 |> group_by(month) |> 
+  summarize(total_sales = sum(sales)) |> 
+  arrange(desc(total_sales))
+```
+
+The month where the most houses were sold in Texas in 2012 is August, with 29,995 total sales.
+
+Exercise 11:
+
+First we will need to filter the data to show only the cities Austin and Dallas, as well as only the years 2000 and 2001. Then, we will need to group the dataset by cities, and then use the sum function to create a variable that shows the total houses sold in that city in the time period we have filtered.
+```{r}
+txhousing |> filter(city == "Austin" | city == "Dallas") |> 
+  filter(year == 2000 | year == 2001) |> 
+  group_by(city) |> 
+  summarize(total_sales = sum(sales))
+```
+
