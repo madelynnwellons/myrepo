@@ -173,7 +173,8 @@ mean(fair_die_sample)
 The mean of the fair die sample is 3.47.
 ```{r}
 ggplot(df_fair_die_sample, aes(x = fair_die_sample)) +
-  geom_histogram(binwidth = 1, color = "white")
+  geom_histogram(binwidth = 1, color = "white") +
+  geom_vline(xintercept = 3.47, color = "navy blue")
 ```
 
 Now, we will do the same thing for the second die's sample (loaded die 6).
@@ -183,7 +184,8 @@ mean(loaded_die6_sample)
 The mean here is 4.531.
 ```{r}
 ggplot(df_loaded_die6_sample, aes(x = loaded_die6_sample)) +
-  geom_histogram(binwidth = 1, color = "white")
+  geom_histogram(binwidth = 1, color = "white") +
+  geom_vline(xintercept = 4.531, color = "navy blue")
 ```
 
 Now finally, we will do the same for the last die (loaded die 56).
@@ -193,6 +195,7 @@ mean(loaded_die56_sample)
 The mean here is 4.547.
 ```{r}
 ggplot(df_loaded_die56_sample, aes(x = loaded_die56_sample)) +
-  geom_histogram(binwidth = 1, color = "white")
+  geom_histogram(binwidth = 1, color = "white") +
+  geom_vline(xintercept = 4.547, color = "navy blue")
 ```
 
