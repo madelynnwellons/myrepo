@@ -1,0 +1,301 @@
+---
+title: "Wellons_HW4"
+author: Madelynn Wellons
+date: 9/14/21
+output: html_document
+---
+
+Question 1:
+
+A- First, I will write out a conditional statement to express the probability that a person speaks Spanish given that they are from South America. The probability is P(Spanish), with the condition of (South America), so we would write it out like this:
+$$ P(\text{Spanish} | \text{South America}) $$
+B- To reverse this in the notation I would just reverse the order (so it would be the probability of someone being from South America given the condition that they speak Spanish):
+$$ P(\text{South America} | \text{Spanish}) $$
+C- I would expect that the probability of someone speaking Spanish with the condition of being from South America would be higher, because there are many people who speak Spanish outside of South America but I would estimate there are significantly less people who live in South America and don't speak Spanish (with those living in Brazil being the largest number of people who don't speak Spanish- even then, many people in Brazil know both Portugese and Spanish).
+
+D- The full equation for conditional probability is P(A∩B)/P(B); to put that in notation where the probability of event A is someone speaking Spanish and the condition B being that someone is from South America, that would be as follows:
+$$ \frac{P(\text{Spanish n South America})}{P(\text{South America})} $$
+
+Question 2:
+
+First I will input the code for the decision tree:
+```{r}
+library(DiagrammeR)
+library(tidyverse)
+
+tree <-
+    create_graph() %>% 
+    add_n_nodes(
+      n = 7, 
+      type = "path",
+      label = c("START", "B", "G", "B", "G", "B", "G"), 
+      node_aes = node_aes(
+        shape = "circle",
+        height = 1,
+        width = 1,
+        x = c(0, 3, 3, 6, 6, 6, 6),
+        y = c(0, 2, -2, 3, 1, -3, -1), 
+        fill = c("white", "blue", "green", "blue", "blue", "blue", "blue"))) %>% 
+    add_edge(
+      from = 1,
+      to = 2,
+      edge_aes = edge_aes(
+        label = "0.5"
+      )) %>% 
+  add_edge(
+      from = 1,
+      to = 3,
+      edge_aes = edge_aes(
+        label = "0.5", 
+        color = "red"
+      )) %>% 
+  add_edge(
+      from = 2,
+      to = 4,
+      edge_aes = edge_aes(
+        label = "0.5"
+      )) %>% 
+  add_edge(
+      from = 2,
+      to = 5,
+      edge_aes = edge_aes(
+        label = "0.5"
+      )) %>% 
+  add_edge(
+      from = 3,
+      to = 6,
+      edge_aes = edge_aes(
+        label = "0.5"
+      )) %>% 
+  add_edge(
+      from = 3,
+      to = 7,
+      edge_aes = edge_aes(
+        label = "0.5"
+      )) 
+render_graph(tree)
+```
+
+a- The arrows that I will cover in red are the ones with at least one girl- that is all branches on the bottom left (that have the eldest child as a girl) and the branch that has the first child as a boy, second child as a girl. I will color the girl-girl node (bottom right 'G' circle) in green to show that that is the node for the branch that contains both children being girls. Below is the code and the diagram showing these changes:
+```{r}
+tree2a <-
+    create_graph() %>% 
+    add_n_nodes(
+      n = 7, 
+      type = "path",
+      label = c("START", "B", "G", "B", "G", "B", "G"), 
+      node_aes = node_aes(
+        shape = "circle",
+        height = 1,
+        width = 1,
+        x = c(0, 3, 3, 6, 6, 6, 6),
+        y = c(0, 2, -2, 3, 1, -3, -1), 
+        fill = c("white", "blue", "blue", "blue", "blue", "blue", "green"))) %>% 
+    add_edge(
+      from = 1,
+      to = 2,
+      edge_aes = edge_aes(
+        label = "0.5"
+      )) %>% 
+  add_edge(
+      from = 1,
+      to = 3,
+      edge_aes = edge_aes(
+        label = "0.5", 
+        color = "red"
+      )) %>% 
+  add_edge(
+      from = 2,
+      to = 4,
+      edge_aes = edge_aes(
+        label = "0.5",
+      )) %>% 
+  add_edge(
+      from = 2,
+      to = 5,
+      edge_aes = edge_aes(
+        label = "0.5",
+        color = "red"
+      )) %>% 
+  add_edge(
+      from = 3,
+      to = 6,
+      edge_aes = edge_aes(
+        label = "0.5",
+        color = "red"
+      )) %>% 
+  add_edge(
+      from = 3,
+      to = 7,
+      edge_aes = edge_aes(
+        label = "0.5",
+        color = "red"
+      )) 
+render_graph(tree2a)
+```
+There are four total possible outcomes (I still highlighted the bottom red arrow from the starting circle to the first G node to show that any arrows coming from that node would be qualified, but since we need both datapoints in order to have a total outcome (cannot calculate the probability of both children being girls if you have outcomes with just one child), that doesn't "count" as an outcome for this exercise)- the four arrows on the right side of the decision tree. Calculating the conditional probability of both girls, assuming one is a girl, narrows the total outcomes down to three (the three red arrows), and only one of those outcomes (the green G node) matches our probability statement. Therefore, the probability here is 1/3; this is the same value as in the text.
+
+b- Next, I will alter the code to show the decision tree diagram for probability of both children being a girl given that the elder is a girl. 
+```{r}
+tree2b <-
+    create_graph() %>% 
+    add_n_nodes(
+      n = 7, 
+      type = "path",
+      label = c("START", "B", "G", "B", "G", "B", "G"), 
+      node_aes = node_aes(
+        shape = "circle",
+        height = 1,
+        width = 1,
+        x = c(0, 3, 3, 6, 6, 6, 6),
+        y = c(0, 2, -2, 3, 1, -3, -1), 
+        fill = c("white", "blue", "blue", "blue", "blue", "blue", "green"))) %>% 
+    add_edge(
+      from = 1,
+      to = 2,
+      edge_aes = edge_aes(
+        label = "0.5"
+      )) %>% 
+  add_edge(
+      from = 1,
+      to = 3,
+      edge_aes = edge_aes(
+        label = "0.5", 
+        color = "red"
+      )) %>% 
+  add_edge(
+      from = 2,
+      to = 4,
+      edge_aes = edge_aes(
+        label = "0.5",
+      )) %>% 
+  add_edge(
+      from = 2,
+      to = 5,
+      edge_aes = edge_aes(
+        label = "0.5"
+      )) %>% 
+  add_edge(
+      from = 3,
+      to = 6,
+      edge_aes = edge_aes(
+        label = "0.5",
+        color = "red"
+      )) %>% 
+  add_edge(
+      from = 3,
+      to = 7,
+      edge_aes = edge_aes(
+        label = "0.5",
+        color = "red"
+      )) 
+render_graph(tree2b)
+```
+The conditional probability here will be 1/2; similarly to the last graph, we can ignore the first red arrow as it is just pointing us along the path and is not a full observation, so it is the one green node divided by the 2 total outcomes. 
+
+Question 3:
+
+The first part of the equation is the posterior odds; this is the odds of something happening once considering both of the following portions of the equation (prior odds and likelihood ratio). The second part of the equation is the prior odds, which is the odds of something happening before you have obtained more information (via a condition for conditional probability, a study, experiment, etc.). That is then multiplied by the likelihood ratio, which is the ratio of two quantities (false positive rate divided by the true positive rate).
+
+Question 4:
+
+First we will run the code Nico gave us in order to create the values for the fair coin and biased coin.
+```{r}
+fair_coin <- 1/2
+biased_coin <- 3/4
+heads <- 3
+
+fair_coin^heads * 1/2 / (fair_coin^3 * 1/2 + biased_coin^heads * 1/2)
+```
+a- In order to figure out how many heads in a row are necessary for the probability to dip below 10%, we can run the same formula over again using a vector to serve as a loop (I tried to figure out adding in the actual for loop function but was having trouble with it, and discovered this work around)- in order to do that, we have to first make a vector with values (we can try 1-10 for now but may need to add some values for the next portion when we look for an even smaller probability). That way, we can put the vector in (so it would be fair_coin^[VECTOR NAME] etc.) as opposed to just running the code on our own 10 different times. 
+```{r}
+n <- c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+fair_coin^n * 1/2 / (fair_coin^n * 1/2 + biased_coin^n * 1/2)
+
+```
+In order to dip below 10% probability, you would need to have 6 heads in a row. 
+
+b- The answer here is also found in the code/calculation above; you would need to have 8 heads in a row in order to get the probability to fall below 5% as 7 heads in a row is .055 (5.5%) and 8 heads in a row is .037 (3.7%).
+
+c- In order to solve this one, we can run very similar code to what we did in the first portion of Q4, but instead we will switch the biased_coin value to be 1/4 (as it as a 1/4 chance of getting a heads, since it is 1-3/4).
+```{r}
+biased_coin_t <- 1/4
+tails <- 3
+fair_coin^tails * 1/2 / (fair_coin^tails * 1/2 + biased_coin_t^tails * 1/2)
+```
+
+The probability that we are flipping the fair coin is 88.9%.
+
+Question 5:
+
+a- The specificity of a test is the true negative rate (or the opposite value of the false positive rate, as those are inverse e.g. if the false positive rate is 10% then the true negative rate will be 90%)- in practice it means that the more specific a test is, the higher the threshold is for a positive test.
+
+b- The sensitivity of a test is the true positive rate (or the opposite of the false negative rate, as those are inverse)- in practice it means that the more sensitive a test is, the lower the threshold is for a positive test (e.g. in a medical setting, one type of COVID test might be considered more sensitive than another if it only requires a very small viral load in order to give back a positive result).
+
+c- If both the sensitivity and specificity of the test lower to 90%, we can run the same equation in the book on page 51 but replace the corresponding values that relate to these rates- e.g. now the P(T|D)P(D) value will be .90 * .01 instead of .95 * .01. 
+```{r}
+(.9*.01)/(.9*.01 + .1*.99)
+```
+The probability that Fred has the disease given he tested positive is only 8.3%- this makes a lot of sense as when the test was 95% accurate this probability was twice as high.
+
+d- The probability that Andrea has the disease can be calculated in a very similar way that we calculated Fred's probability- instead of substituting the .95's and .05 values, we will be substituting the .01 and .99 values in the equation with .05 and .95 to reflect the new prior odds value.
+```{r}
+(.95*.05)/(.95*.05 + .05*.95)
+```
+The probability that Andrea has the disease is 50%.
+
+e- First, we will need to the run calculations in order to determine what values to put in the nodes. The first node will be 10,000 people as was the case in the book- however, since conditionitis B has a 5% prevalence rate, there will be 500 people in the diseased node and 9,500 people in the healthy node. Assuming that the accuracy of the test will still be 95% as it was in the book and in the earlier question with Andrea, we can just multiply the diseased/healthy nodes by 95% to obtain the true positive and true negative values; similarly, in order to obtain the false positive and false negative values, we would multiply those nodes by 5%. Of the 500 diseased people, we will get 25 false negatives and 475 true positives; of the 9,500 healthy people we will get 475 false positives and 9,025 true negatives. Below is the code and decision tree with these values and labels added in:
+```{r}
+tree <-
+    create_graph() %>% 
+    add_n_nodes(
+      n = 7, 
+      type = "path",
+      label = c("10,000 People", "9,500 People", "500 People", "9,025", "475", "25", "475"),
+      node_aes = node_aes(
+        shape = "circle",
+        height = 1,
+        width = 1,
+        x = c(0, 3, 3, 6, 6, 6, 6), 
+        y = c(0, 2, -2, 3, 1, -3, -1))) %>% 
+    add_edge(
+      from = 1,
+      to = 2,
+      edge_aes = edge_aes(
+        label = "healthy"
+      )) %>% 
+  add_edge(
+      from = 1,
+      to = 3,
+      edge_aes = edge_aes(
+        label = "diseased"
+      )) %>% 
+  add_edge(
+      from = 2,
+      to = 4,
+      edge_aes = edge_aes(
+        label = "test -"
+      )) %>% 
+  add_edge(
+      from = 2,
+      to = 5,
+      edge_aes = edge_aes(
+        label = "test +"
+      )) %>% 
+  add_edge(
+      from = 3,
+      to = 6,
+      edge_aes = edge_aes(
+        label = "test -"
+      )) %>% 
+  add_edge(
+      from = 3,
+      to = 7,
+      edge_aes = edge_aes(
+        label = "test +"
+      )) 
+render_graph(tree)
+```
+Question 6-
+
+One example of the prosecutor's fallacy is the one we've discussed in class a lot as an example, where there is a 100% chance that your mom will not answer the phone if she is dead. However, the probability of your mom being dead given that she has not answered the phone is still going to be fairly low because the prior probability of your mom being dead is going to be very low, so even given the condition that she has not answered her phone the probability will still remain low.
