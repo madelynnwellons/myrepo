@@ -1,0 +1,49 @@
+---
+title: "Wellons_HW5_Chp1"
+author: Madelynn Wellons
+date: 9/21/21
+output: html_document
+---
+
+Exercise 1.1:
+a- Possible prior information could be that regular milk (colored white) comes from cows, and those cows are usually white with black spots (and since she was a toddler at the time, she likely didn't have the prior information that all cows give the same "flavor" of milk).
+b- Leslie states that the new information she discovered was knowing that chocolate syrup exists.
+c- The updated conclusion is that you can use chocolate syrup to turn regular milk into chocolate milk.
+
+Exercise 1.2:
+a- Seeing one potential case of a side effect does not negate the overall rareness of serious side effects from the vaccine #MyCousinsFriendinTrinidad
+b- The side-effects Nicki Minaj has spread about the vaccine do not exist or are very rare #MyCousinsFriendinTrinidad
+
+Exercise 1.3:
+prior- scared of learning R because I heard it was difficult
+new data- first few weeks have been ok/there are a lot of open source resources
+posterior- I am less afraid of R
+
+Exercise 1.4:
+prior- best friend thought her son was potty-training too late (he is 13 months old); in a lot of Chinese families (she is Chinese, her husband is white) you begin potty training as newborns with a different technique than used in the US
+new data- I told her that most toddlers in the US don't begin potty training until 2 because we wait until they can communicate with us that they need to go to the bathroom
+posterior- She realized her son did not need to begin potty-training yet since she is using mostly Westernized parenting techniques
+
+Exercise 1.5:
+prior 1- never used Bayesian statistics before/neutral about Bayes
+new data 1- learned to use Bayes in a school setting (medical/diagnostic application) and saw its' importance
+posterior 1- became interested in Bayes
+new data 2- took a class using Bayes on a problem that was overly difficult and also was disgusting (topic was ant eggs)
+posterior 2- became disinterested in Bayes
+new data 3- took a class on Bayes with a great professor
+posterior 3- became very interested in Bayes
+
+Exercise 1.6:
+a- Frequentist thinking would question the validity of the new data given the hypothesis; the question being answered is "If I don't get this position, am I correct that I am qualified for this position"
+b- Bayesian thinking would question the validity of the question given the data; the question being answered is "Will I be hired given that I am qualified for the position"
+c- I would rather know the Bayesian answer, as I am fairly certain that I am qualified for the position but outside forces (e.g. other qualified candidates) could impact my ability to be hired, and I would rather know my chances of success at obtaining the job than knowing if I am qualified for a job that I might end up not getting.
+
+Exercise 1.7:
+a- I know a lot about the band AJR
+b- A hypothesis could be "Their next album will come out in 2022"
+c- I know that they just recently released an album this summer and are currently still finalizing music videos and tour dates for this album, so they are unlikely to be releasing a new album anytime soon.
+d- I am using Bayesian analysis here (taking the new data to determine the validity of the hypothesis)
+
+Exercise 1.8:
+a- Bayesian statistics is useful because it allows you to adjust probabilities and understanding based on both prior and new data, giving you more realistic probabilities (especially in the medical field) for anything that originally has a low probability before obtaining new data.
+b- Both Bayesian and frequentist statistics use data for similar purposes (to make/fit/examine models, predictions, and hypotheses). 
