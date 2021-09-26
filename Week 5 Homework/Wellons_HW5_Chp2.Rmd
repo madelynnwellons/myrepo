@@ -1,0 +1,350 @@
+---
+title: "Wellons_HW5_Chp2"
+author: Madelynn Wellons
+date: 9/24/21
+output: html_document
+---
+
+Exercise 2.1
+a- P(B|A) > P(B) because in this case, if you have already enjoyed one novel by this author, that should increase the probability that you enjoy her newer novel.
+b- P(B|A) < P(B) because if it is not only 0 degrees the day before, it is also in January in Minnesota where the temperatures are usually below freezing during the winter, so the probability of the next day being 60 degrees given this information will be lower.
+c- P(B|A) > P(B) because if someone sleeps less, they are more likely to make mistakes
+d- P(B|A) > P(B) because hastags allow for a tweet to get more noticed (trending page, search by hashtag, etc.) therefore increasing the probability it would get retweeted.
+
+Exercise 2.2
+a- This is a conditional probability as the two events are related/one is impacting the other (driving above the speed limit -> speeding ticket); the notation would be .73 = P(B|A)
+b- This is a marginal probability as it only has one variable (driving above the speed limit), the notation would be .2 = P(A)
+c- This is a marginal probability as it only has one variable (having used R), the notation would be .15 = P(D)
+d- This is a conditional probability; notation is .91 = P(D|C)
+e- This is a joint probability as it is assessing two independent events/their overlap, not creating a condition or calculating a percent within a group; the notation here is .38 = P(FnE)
+f- This is a conditional probability; the notation is .95 = P(E|F)
+
+Exercise 2.3
+a- This cannot be a Binomial model, as n would be the single hour, as opposed to the "number of attempts/trials" and we do not have an actual value for pi (just knowing that roughly 6 babies are born each hour, as opposed to the probability that there will be a successful birth or the probability of having x babies born each hour).
+b- Y|.9 ~ Bin(27, .9) We are able to make a binomial model here because we have values for pi and n, and they make sense within the model (the probability and the n correspond to the same event).
+c- This cannot be a Binomial model, as Y and n are the same thing in this case. There is no fixed number of trials, as the Y we are searching for is the number of trials it would take for this event to occur.
+d- We cannot create a Binomial model here, as this is a single trial/event, and we also were not given any probability or other information about how often Henry is late/the amount of time usually spent before Henry arrives.
+e- This cannot be a Binomial model as we do not have the values for pi or n (this is a single event and we would be trying to calculate the probability that your friends would throw this party or not).
+f- Y|.8 ~ Bin(60, .8) We are able to make a binomial model here because we have values for pi and n, and they correspond with one another (and the same event- showing up to the party).
+
+Exercise 2.4
+Prior probability- .05 of vampires existing, not is .95
+Probability of sparkling conditional to vampires existing- .7; conditional to vampires not existing- .03
+We will divide the two conditional probabilities to create the likelihood ratio, then multiply that by the prior odds and turn that back into a probability (add the numerator to the denominator).
+```{r}
+.7/.03
+```
+(5/95)*23.3333 = 23.3333/19 -> probability is 23.3333/42.3333
+```{r}
+23.3333/42.3333
+```
+The probability here is 55.12%.
+
+Exercise 2.5
+a- The prior probability that a selected tree has mold is .18
+b- The probability that an employee would select a maple can be calculated by adding together the probabilities of selecting a maple tree with and without mold (since that is a dummy variable, we can just add together both outcomes):
+```{r}
+#prob of maple and mold = .8 times .18
+#prob of maple and not mold = .1 times .82
+(.8*.18) + (.1*.82)
+```
+The probability that an employee would select a maple is 22.6%
+c- Here we can find the probability that the selected maple tree has mold by multiplying the % of infected trees that are maple by the prior probability that a selected tree has mold (.18), then dividing that by the value we just calculated (probability of an employee selecting a maple):
+```{r}
+(.8*.18)/.226
+```
+The probability that a tree has mold given that it is a maple tree is 63.72%.
+d- The prior probability of a tree having mold was .18, while once we knew it was a maple the posterior probability jumped to roughly .64; this is because a majority (80%) of the moldy trees were maples, so adding the condition that the tree was a maple increased the chances of that given tree having mold.
+
+Exercise 2.6
+In order to determine the posterior probability that Sandra likes a restaurant given that it has less than 4 stars on Yelp, we would need the probability of a restaurant having fewer than 4 stars given that she does not like the restaurant (we already having the probability for if she does like the restaurant, as well as the % rated lower than 4 stars given that she likes the restaurant).
+
+Exercise 2.7
+a- Similarly to the tree example, since this is a dummy variable (swiping right or left), we can add together the probabilities of someone being non-binary and being swiped right on/left on:
+```{r}
+#prob of being non-binary and swiped right: .08*.2
+#prob of being non-binary and swiped left: .92*.1
+(.08*.2)+(.92*.1)
+```
+The probability that a randomly chosen person on this dating app is non-binary is 10.8%.
+b- The probability of Matt swiping right conditional to the profile being someone who is non-binary can be calculated similarly to how we did before with the trees example:
+```{r}
+(.2*.08)/.108
+```
+The probability here is 14.8%
+
+Exercise 2.8
+a- The probability that Mine's flight will be delayed given it is a morning flight is calculated below (taking the probability of a flight being delayed and it being a morning flight, dividing that by the % of flights that are morning flights):
+```{r}
+#prob of a flight being delayed = .15 times prob of a delayed flight being a delayed morning flight = .4
+(.15*.4)/.3
+```
+There is a 20% chance that Mine's flight will be delayed.
+b- In order to calculate this, we will need to calculate the probability of a flight being a morning flight and not being delayed (probability of a morning flight minus the probability of a morning delayed flight), then we can divide that by the probability of any given flight being delayed:
+```{r}
+#prob morning flight = .3
+#prob morning and delayed flight = .4 * .15
+#prob of a flight not being delayed = .85 (1-.15)
+(.3-(.4*.15))/.85
+```
+The probability that Alicia is on a morning flight is 28%.
+
+Exercise 2.9
+a- To fill up the good mood and bad mood columns, we just need to multiply the probabilities given by the probability of having a good or bad mood. After that, we can calculate the totals easily via addition. I'll then put this into a table via creating a data frame with those values.
+```{r}
+good1 <- c(.05, .84, .11)
+bad1 <- c(.13, .86, .01)
+good2 <- good1*.4
+bad2 <- bad1*.6
+#totals- right column
+totalsR <- good2 + bad2
+#totals- bottom row will just be the probability of being in a good or bad mood (.4 and .6)
+#updating vectors to include totals to create table
+good_mood <- c(.02, .336, .044, .4)
+bad_mood <- c(.078, .516, .006, .6)
+totals <- c(.098, .852, .05, 1)
+probability_table <- data.frame(good_mood, bad_mood, totals)
+probability_table
+```
+b- Without knowing anything about the prior day's messages, the probability of your roommate being in a good mood is .4; this is the prior probability.
+c- This is the likelihood ratio, and they are 11% likely to have received this many texts given they are in a good mood.
+d- The posterior probability that my roommate is in a good mood is calculated below, using Bayes' rule as we have in previous problems:
+```{r}
+#prob of having 50 texts given they're in a good mood is .11, multiple by prob of being in a good mood (.4) and divide by overall probability of having over 45 text messages (calculated in the table)
+(.11*.4)/.05
+```
+The posterior probability is 88%
+
+Exercise 2.10
+a- Similar to past problems, since this is a dummy variable we can add up the probability of LGBTQ in rural and urban areas:
+```{r}
+#prob of being LGBTQ and being in a rural area= .085*.1
+#prob of being LGBTQ and being in an urban area= .915*.105
+(.085*.1)+(.915*.105)
+```
+The probability of them being LGBTQ is 10.46%.
+b- If they identify as LGBTQ, the probability of them living in a rural area can be calculated by taking the probability of them being LGBTQ and in a rural area and dividing that by the overall probability of them being LGBTQ:
+```{r}
+(.085*.1)/.104575
+```
+The probability of them living in a rural area is 8.13%
+c- Similarly to above, we would calculate this by just substituting the probabilities of not being LGBTQ:
+```{r}
+(.085*.9)/(1-.104575)
+```
+The probability of them living in a rural area is 8.54%.
+
+Exercise 2.11
+a- The binomial model would be Y|pi~Bin(6,pi). The conditional pmf would then be:
+f(y|pi) = C(6, y)(pi)^y(1-pi)^(6-y) for y in [0, 1, 2, 3, 4, 5, 6]
+b- Assuming pi is .3, if Mohammed got 4 of the 6 internships we would calculate this via the choose function (replicating the conditional pmf above):
+```{r}
+choose(6,4)*(.3)^4*(.7)^2
+```
+The likelihood of this happening under the pmf where pi=.3 is only 5.9%.
+c- In order to construct the posterior model of pi, we need to calculate the likelihood under the other 2 possible pi values. Then we will need the other aspect of the equation (normalizing constant)
+```{r}
+#pi values are .3, .4, and .5- we already have .3's values from the earlier portion of the problem, so we will fill in .4 and .5 in the condition pmf
+#.4 value
+choose(6,4)*(.4)^4*(.6)^2
+#.5 values
+choose(6,4)*(.5)^4*(.5)^2
+```
+```{r}
+#normalizing constant- multiply the likelihoods by the f(pi) table values
+.059535*.25+.13824*.6+.234375*.15
+```
+```{r}
+#posterior probability for each pi- f(pi)*likelihood/normalizing constant
+#pi = .3
+(.25*.059535)/.132984
+#pi = .4
+(.6*.13824)/.132984
+#pi = .5
+(.15*.234375)/.132984
+```
+The posterior model of pi is now the following: .3 -> .11, .4 -> .62, .5 -> .26
+
+Exercise 2.12
+a- The binomial model would be Y|pi~Bin(7, pi); the corresponding pmf would be the following:
+f(y|pi) = C(7, pi)(pi)^y(1-pi)^(7-y) for y in [0, 1, 2, 3, 4, 5, 6, 7]
+b- The posterior pmf if Y=1 would be as follows:
+equation becomes f(pi|1) = C(7,1)(pi)(1-pi)^6 for pi values of .1, .25, .4
+```{r}
+choose(7,1)
+```
+We can simplify it to the following: 7pi(1-pi)^6
+```{r}
+#I will be using vectors this time to make it easier to keep track
+pi <- c(.1, .25, .4)
+7*pi*(1-pi)^6
+```
+To get the normalizing constant we will just multiply the above by the f(pi) values, and add them together.
+```{r}
+nc <- .3720087*.2+.3114624*.45+.1306368*.35
+```
+```{r}
+#posterior probabilities calculation
+(.2*.3720087)/nc
+(.45*.3114624)/nc
+(.35*.1306368)/nc
+```
+c- The differences between the prior and posterior models of pi are that the pmf essentially moved to the left (imagining it was graphed); the peak of the pmf moved to the left, so the values for the first two values of pi increased while the last value decreased.
+d- Here we can essentially do the same calculations as before, but we must adjust the normalizing constant as the f(pi) values differ here.
+```{r}
+ncKris <- .3720087*.15+.3114624*.15+.1306368*.7
+```
+```{r}
+(.15*.3720087)/ncKris
+(.15*.3114624)/ncKris
+(.7*.1306368)/ncKris
+```
+While Kris' posterior model of pi still seems like it essentially was shifted to the left, the top value remained higher due to the relatively high level of prior f(pi) when pi was .4 (likely due to the fact that Kris is an instructor and has more experience/training, so is more confident in his abilities than Miles).
+
+Exercise 2.13
+a- I would guess that the posterior model of pi honestly wouldn't change too much, since the data here is lining up with the highest f(pi) value (47/80 is roughly .6, and the f(pi) for .6 is the highest in the distribution)- I would estimate that the .4 pi value's f(pi) would shrink, and that the .6 pi value's f(pi) would rise as the curve is essentially just being squished a bit as there is more data to strengthen the original hypotheses.
+b- I will follow the same steps I have been following in order to calculate the posterior model here:
+```{r}
+pi13 <- c(.4, .5, .6, .7)
+#model is Y|pi~Bin(80, pi) and pmf is C(80, 47)*pi^47*(1-pi)^33
+choose(80,47)*(pi13)^47*(1-pi13)^33
+```
+```{r}
+#likelihoods times f(pi) to get nc
+nc13 <- .0003014292*.1+.0263617861*.2+.0879960072*.44+.0092893167*.26
+```
+```{r}
+#calculating posterior f(pi) values
+(.1*.0003014292)/nc13
+(.2*.0263617861)/nc13
+(.44*.0879960072)/nc13
+(.26*.0092893167)/nc13
+```
+The curve tightened a lot more than I expected; I think that is probably because a majority of the calculations I have done so far have had smaller sample sizes, so my expectations were lower. 
+c- That would change the posterior model by making the curve even smaller than before- the f(pi) for pi=.6 would be incredibly high while the rest would be very small.
+
+Exercise 2.14
+a- In order to convert these surveys into prior models, we just need to do some quick division to calculate the % of people who think each value of pi is likely.
+```{r}
+#pi = .15, .25, .75, and .85 all have the same value so we will only calculate it once
+3/20
+#pi = .5 is 8/20
+8/20
+```
+The prior model for pi would be as follows: pi= .15, f(.15)= .15; pi= .25, f(.25)= .15; pi= .5, f(.5)= .4; pi= .75, f(.75)= .15; pi= .85, f(.85)= .15
+b- The model for this would be the following: C(13,3)*pi^3(1-pi)^10; we will plug our pi values in:
+```{r}
+pi14 <- c(.15, .25, .5, .75, .85)
+likely14 <- choose(13,3)*(pi14)^3*(1-pi14)^10
+```
+I had to convert the likelihoods into a vector due to the length of each value; now I will continue as normal (multiplying each likelihood by f(pi)):
+```{r}
+nc14 <- likely14[1]*.15+likely14[2]*.15+likely14[3]*.4+likely14[4]*.15+likely14[5]*.15
+```
+```{r}
+#posterior values calculation
+(.15*likely14[1])/nc14
+(.15*likely14[2])/nc14
+(.4*likely14[3])/nc14
+(.15*likely14[4])/nc14
+(.15*likely14[5])/nc14
+```
+c- Li Qiang learned that the bus is more likely to arrive late 25% of the time, not 50% as the other passengers estimated.
+
+Exercise 2.15
+a- If the previous researcher was more sure that a hatchling would survive, the f(pi) model would be shifted to the right; the f(pi) values for .7 and .75 would be higher, and the values for .6 and .65 would be lower.
+b- If the previous researcher was less sure that a hatchling would survive, the f(pi) model would be shifted to the left; the f(pi) values for .7 and .75 would be lower, and the values for .6 and .65 would be higher.
+c- The pmf would be the following: C(15, 10)*pi^10(1-pi)^5
+```{r}
+pi15 <- c(.6, .65, .7, .75)
+likely15 <- choose(15,10)*(pi15)^10*(1-pi15)^5
+nc15 <- likely15[1]*.3+likely15[2]*.4+likely15[3]*.2+likely15[4]*.1
+(.3*likely15[1])/nc15
+(.4*likely15[2])/nc15
+(.2*likely15[3])/nc15
+(.1*likely15[4])/nc15
+```
+d- In context, this model assumes that the most likely outcome is for roughly 65% of the hatchlings to survive given the prior assumptions about the survival rate and the data of these 15 hatchlings; the probability of 60% survival rate is 28.1%, probability of 65% survival rate is 42.8%, probability of 70% survival rate is 20.8%, and the probability of a 75% survival rate is 8.3%.
+
+Exercise 2.16
+a- I personally side more with the scientists who cite that, even though 70% or so of the paintings they see are fake/forged, they are only really being called in for artwork that is already in question; outside of those inflated numbers, the most common number cited was between 40-50%. I would put pi of .1 at f(pi)= .05, pi of .3 at f(pi)= .2, pi of .5 at f(pi)= .5, and pi of .7 at f(pi)= .25
+b- My prior is somewhat similar to the one below, but mine stretches more/is flatter (and has more pi values, which may contribute), while this prior model has a more narrow curve with a peak at .4 instead of at .5
+c- Given that the prior f(.6) is only .25, I would guess that the number of artworks would be around 6 (since that would be a probability of .6, matching with the pi, it should raise the f(pi) value by a good amount). We can try that value first:
+```{r}
+pi16 <- c(.2, .4, .6)
+likely16 <- choose(10,6)*(pi16)^6*(1-pi16)^4
+nc16 <- likely16[1]*.25+likely16[2]*.5+likely16[3]*.25
+(likely16[3]*.25)/nc16
+```
+The value here is above the .4 we are looking for; we should now check to see if 5/10 of the artworks would reduce the f(pi) value to below .4 or not.
+```{r}
+likely162 <- choose(10,5)*(pi16)^5*(1-pi16)^5
+nc162 <- likely162[1]*.25+likely162[2]*.5+likely162[3]*.25
+(likely162[3]*.25)/nc162
+```
+Since the value here is below .4, we can assume that the minimum number of forged artworks needed would be 5.
+
+Exercise 2.18
+```{r}
+library(dplyr)
+library(janitor)
+```
+
+```{r}
+#Set values for pi and prior f(pi) 
+pi18 <- data.frame(pi = c(.4, .5, .6, .7))
+fpi18 <- c(.1, .2, .44, .26)
+#simulate pi values
+set.seed(1234)
+sim_18 <- sample_n(pi18, size = 10000, weight = fpi18, replace = TRUE)
+```
+Now that we have created 10,000 prior values of pi, we can simulate the same 80 person sample that was done in the original exercise, and we can use the binomial model and the rbinom function here.
+```{r}
+sim_18_2 <- sim_18 |> 
+  mutate(y = rbinom(10000, size = 80, prob = pi))
+sim_18_2 |> 
+  head(3)
+```
+```{r}
+sim_18_2 |> 
+  tabyl(pi) |> 
+  adorn_totals("row")
+```
+Above are the simulated prior pi values; we can now try to see if the results from the survey in the original exercise have appeared in our simulation (and if so, what the probability of that is), using the filter similarly to how the textbook authors do so on the chess simulation example. This will create a new posterior model of pi. 
+```{r}
+sim_18_3 <- sim_18_2 |> 
+  filter(y == 47)
+sim_18_3 |> 
+  tabyl(pi) |> 
+  adorn_totals("row")
+```
+This is similar to our posterior model, where the .6 value increased greatly and the others reduced significantly.
+
+Exercise 2.19
+Similar to the above simulation and the example in the textbook, we will again input the pi and prior f(pi) values, then use those to create the 10,000 values simulation and approximate pi values, then use the values obtaind in Exercise 2.15 to calculate the new posterior model for pi.
+```{r}
+pi19 <- data.frame(pi = c(.6, .65, .7, .75))
+fpi19 <- c(.3, .4, .2, .1)
+set.seed(1234)
+sim_19 <- sample_n(pi19, size = 10000, weight = fpi19, replace = TRUE)
+```
+```{r}
+sim_19_2 <- sim_19 |> 
+  mutate(y = rbinom(10000, size = 15, prob = pi))
+sim_19_2 |> 
+  head(3)
+```
+```{r}
+sim_19_2 |> 
+  tabyl(pi) |> 
+  adorn_totals("row")
+```
+```{r}
+#Filter to show pi values when 10 of the 15 hatchlings survive as they did in Exercise 2.15
+sim_19_3 <- sim_19_2 |> 
+  filter(y == 10)
+sim_19_3 |> 
+  tabyl(pi) |> 
+  adorn_totals("row")
+```
+Here the values again are similar to the posterior model we calculated in Exercise 2.15
