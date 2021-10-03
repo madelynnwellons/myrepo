@@ -1,0 +1,374 @@
+---
+title: "Wellons_HW6"
+author: Madelynn Wellons
+date: 9/30/21
+output: html_document
+---
+
+Exercise 3.1
+First we will load the needed packages for today's homework:
+```{r}
+library(bayesrules)
+library(tidyverse)
+```
+
+a- Since our friend is pretty unsure of her chances, the distribution should be fairly wide. Knowing that the mode should be about .4 and a majority of the values should be between .2 and .6, we can first use the distribution zoo app to quickly determine roughly what the ratio of alpha to beta should be for the mean to be .4, and then we can plug in a few different values into the plot_beta function to determine which distribution seems the closest to the problem. We will be using this method for the other pieces of this exercise as well. After trying a few combinations on the distribution zoo app, it appears that a ratio of about 3/4 for alpha to beta gives a mean of .4 (and although we are looking for the mode, given that this distribution is semi-normal the mean and modes are relatively near one another). We can first try using the values of 3 and 4:
+```{r}
+plot_beta(3, 4)
+```
+While we are looking for a fairly wide distribution, given that the estimate our friend gave us of a majority of the values lying between .2 and .6, this distribution may be too wide- let's try with higher alpha and beta values (6 and 8).
+```{r}
+plot_beta(6, 8)
+```
+This looks much closer to what we are looking for- the mean and mode both appear to be roughly .4, and a majority of the values are between .2 and .6.
+b- Since distribution zoo also gives us the variance here, we can examine a few test distributions on the app looking for a mean/mode of .8 and an SD of .05. However, it appears that we will be unable to find the SD of the distribution using distribution zoo since the highest alpha and beta values are 10, and I was unsuccessful in finding an SD below .1 using combinations of these values. In order to get a mean/mode of roughly .8, I found a 3:1 ratio semi-successful. I'll try finding the SD of my first test case, alpha= 12, beta= 4.
+```{r}
+summarize_beta(12, 4)
+```
+I'm now realizing that in terms of the beta distribution, variance and sd are not the same value- since the variance here is below our target, I will try the summarize beta function again with smaller alpha and beta values.
+```{r}
+summarize_beta(.3, .1)
+```
+This overshot by a bit; I'll try again with slightly larger values.
+```{r}
+summarize_beta(2.1, .7)
+```
+After a few tries, it looks like 2.1 and .7 are the closest values; I'll plot it below to be sure that the distribution looks correct:
+```{r}
+plot_beta(2.1, .7)
+```
+This should be roughly correct; however, I am uncertain if, since the mode here is technically 1 (and not .8) that this distribution works. Unfortunately I was unable to find another distribution where the variance value was .05 so I will hesitantly select the alpha and beta values here of 2.1 and .7!
+c- Here we are looking for a mean/mode of .9, with a majority of the values falling between .85 and 1; plugging in a few values on distribution zoo gives us a ratio of about 1.5:10 to get a mode of .9 (the mean is a bit lower, since the distribution is left-skewed). I'll try plotting this with some higher values to get the distribution a bit more narrow:
+```{r}
+plot_beta(20, 3)
+```
+This is still too wide, so I'll try bumping it up again. Since we're raising the values by a decent amount (and because I forgot to account for there being twice as many observations on the right of the mean as there will be to the left), I'll lower the beta value as well to increase the mean/mode and assist with narrowing the distribution.
+```{r}
+plot_beta(80, 4)
+```
+d- Since Sal does not have any clue, the distribution will be alpha= 1, beta= 1 since it would just be a straight line.
+
+Exercise 3.2
+a- This appears to be a relatively normal distribution, so we can go ahead with our earlier method of estimating the ratio of alpha to beta and then plotting various values. In order to get a mean of .8, the ratio should be roughly 5:1 (I had the most success with 1.2 or 1.3 instead of 1); since our friend is pretty certain we should be getting a fairly narrow distrbution. Let's try relatively high values for our alpha and beta:
+```{r}
+plot_beta(25, 5)
+```
+This is pretty close, but the distribution is still a little too wide given our friend's certainty- let's try with even higher values.
+```{r}
+plot_beta(60, 12)
+```
+This is much closer to what our friend described, with the bulk of the observations lying between 70 and 90%.
+b- This problem is similar to the last variance problem where there is a high peak (mode) and low variance, so we will need to use the mean as a proxy for the mode in this instance. In order to get the mean of 90%, we can use a ratio of 9:1 alpha to beta; let's try plugging that in to see if we need to raise or lower the values to get the target variance.
+```{r}
+summarize_beta(9, 1)
+```
+The variance here is very low, so we will need to lower our values significantly. 
+```{r}
+summarize_beta(.09, .01)
+```
+c- The ratio needed to get the mean is roughly 10:1.5; let's try a few different alpha and beta values to see if we can find an accurate distribution. I started with 10 and 1.5 and that had very large tails, so we can try bumping it significantly:
+```{r}
+plot_beta(60, 9)
+```
+This distribution seems to be pretty accurate! 
+d- Since Ben is pretty unsure, we can still determine the ratio needed for the mean of .3, but can aim for a very wide distribution; the ratio needed for the mean is about 2:5. Given that Ben is fairly unsure, low, single digit values for the alpha and beta might be best to describe this distribution.
+```{r}
+plot_beta(2, 5)
+```
+
+Exercise 3.3
+a- The Beta prior model would be (1,1)- plot below:
+```{r}
+plot_beta(1, 1)
+```
+b- We can determine the mean of this quickly through the summarize function:
+```{r}
+summarize_beta(1, 1)
+```
+The mean here is .5; this aligns with having no clue, since it is just the middle value between 0 and 1.
+c- The standard deviation of the Beta prior model is .2886751 (in the summarize beta code above).
+d- In order to get a smaller standard deviation, in general we can just raise the values of alpha and beta accordingly and that should "narrow" the distribution, causing the SD to decrease. Here is one example of a beta prior model with a lower SD:
+```{r}
+plot_beta(2, 2)
+```
+```{r}
+summarize_beta(2, 2)
+```
+e- In order to get a larger SD, on average you would do the opposite- decrease the alpha and beta values to widen the distribution. Since this distribution is a straight line, decreasing the values below one will essentially invert the distribution (creating a U shape); below is an example of a distribution (.5, .5):
+```{r}
+plot_beta(.5, .5)
+```
+```{r}
+summarize_beta(.5, .5)
+```
+
+Exercise 3.4
+1- Beta (.5, .5) will be the first (a) distribution (horse-shoe shaped) since it is inverted, which only occurs when alpha and beta are below 0
+2- Beta(1, 1) will be the fourth (d) distribution (the straight line) since 1, 1 is the classic "straight line" example where all f(pi) values are equal.
+3- Beta(2, 2) will be the second (b) distribution because it is the widest normal-shaped distribution
+4- Beta(6, 6) will be the last (f) distribution because it is the narrow normal-shaped distribution, and the 6 values of alpha/beta are higher than the 2 values in the earlier question (meaning this matches as the higher alpha/beta values cause a more narrow distribution).
+5- Beta(6, 2) will be the third (c) distribution because it is the last remaining distribution that has a curve, and when alpha is higher than beta the "peak" of the curve will be to the right
+6- Beta(.5, 6) will be the fifth (e) distribution because it has one inverted side and no peak (due to alpha being below 1), and since beta is larger than alpha the higher f(pi) values are on the left of the distribution.
+
+Exercise 3.5
+1- Beta(1, .3) will be the first (a) distribution since it has one inverted side (and beta is less than one)
+2- Beta(2, 1) will be the fourth (d) distribution since it does not have a curve and instead just has a slope, which occurs when one of the alpha/beta values is 1
+3- Beta(3, 3) will be the second (b) distribution since its' peak is in the middle of the distribution, while the remaining options all have skewed alpha/beta values and their peaks are not in the middle (equally distributed/a normal curve)
+4- Beta(6, 3) will be the last (f) distribution since it is the most narrow remaining distribution, and its' peak is on the right of the distribution (due to alpha being higher than beta)
+5- Beta(4, 2) will be the third (c) distribution since it is the last remaining distribution with the peak on the right, and it is wider than distribution f
+6- Beta(5, 6) will be the fifth (e) distribution since its' peak is slightly to the left and it is a relatively narrow distribution compared to the earlier distributions with lower alpha/beta values.
+
+Exercise 3.6
+a- The smallest mean should belong to distribution e since it is heavily right-skewed, and the largest mean should belong to distrbution c since it is heavily left skewed. Below are plots of the distributions, as well as calculated means.
+```{r}
+plot_beta(.5, 6)
+```
+```{r}
+#mean for .5, 6 distribution
+.5/6.5
+```
+```{r}
+plot_beta(6, 2)
+```
+```{r}
+#mean for 6, 2 distribution
+6/8
+```
+b- For this problem, I believe that the distribution with the lowest and highest mode are one and the same- distribution a is bi-modal, with modes of 0 and 1. Below is a visual of the distribution, along with the calculated mode(s).
+```{r}
+plot_beta(.5, .5)
+```
+```{r}
+#I cannot use the normal mode formula to calculate here since alpha and beta are both below 0; I will use the summarize_beta function to automatically calculate it instead
+summarize_beta(.5, .5)
+```
+c- The largest standard deviation would either belong to distribution b or d since they are the widest distributions- since alpha and beta values are smaller in d (1, 1 compared to 2, 2), the d distribution should have the largest SD. The smallest SD likely belongs to distribution e, as it has the smallest variance between its' values (a large majority of them fall between 0 and .25). Below are their plots and calculated SD's:
+```{r}
+plot_beta(1, 1)
+```
+```{r}
+#SD calculation for (1,1) distribution:
+var1 <-  1/(4*3)
+sqrt(var1)
+```
+```{r}
+plot_beta(.5, 6)
+```
+```{r}
+#SD calculation for .5, 6 distribution
+var2 <- 3/((6.5^2)*(7.5))
+sqrt(var2)
+```
+
+Exercise 3.7
+a- Below are the plots for the 6 different Beta models in exercise 3.4:
+```{r}
+plot_beta(.5, .5)
+plot_beta(1, 1)
+plot_beta(2, 2)
+plot_beta(6, 6)
+plot_beta(6, 2)
+plot_beta(.5, 6)
+```
+b- Below are the statistical summaries for the beta prior models in 3.4:
+```{r}
+summarize_beta(.5, .5)
+summarize_beta(1, 1)
+summarize_beta(2, 2)
+summarize_beta(6, 6)
+summarize_beta(6, 2)
+summarize_beta(.5, 6)
+```
+Using the output to check our answers for 3.6, we were correct regarding the means (the highest being .75, the lowest being about .077). In regards to the mode however, while we were correct on the highest mode being the .5, .5 distribution, the lowest mode was 0 in both the .5, .5 distribution as we specified but also in the .5, 6 distribution. For the SD, we were correct on the lowest SD calculation (the .5, 6 distribution with an SD of .097), but we incorrectly selected the 1,1 distribution for the highest SD. In fact, it was actually the .5, .5 distribution with the lowest SD- looking at the plot, I assumed since it had many data points around 2 modes that it would have a lower SD than the straight line plot I selected, but that was incorrect.
+
+Exercise 3.9
+a- To calculate the prior mean, mode, and SD we can use the summarize_beta function:
+```{r}
+#first salesperson
+summarize_beta(8, 2)
+#second salesperson
+summarize_beta(1, 20)
+```
+For the first salesperson, the prior mean is .8, mode is .875, and the SD of pi is .12
+For the second salesperson, the prior mean is .048, mode is 0, and the SD of pi is .045
+b- Below are the plots for each salesperson:
+```{r}
+#first salesperson
+plot_beta(8, 2)
+```
+```{r}
+#second salesperson
+plot_beta(1, 20)
+```
+The first salesperson thinks the most likely proportion of US residents that prefer the term "pop" to be between .5 and .95, peaking around .87 or so. Meanwhile, the second salesperson thinks this is much less likely- he believes the most likely proportion is 0% of US residents, with only up to 25% of the US population preferring the term "pop" to be at all likely in his model.
+
+Exercise 3.10
+a- We can use the summarize_beta_binomial function here to quickly calculate the posterior alpha and beta for each posterior model:
+```{r}
+#first salesperson
+summarize_beta_binomial(8, 2, 12, 50)
+```
+The posterior model for the first salesperson is pi|y=12~Beta(20,40).
+```{r}
+summarize_beta_binomial(1, 20, 12, 50)
+```
+The second salesperson's posterior model is pi|y-12 ~ Beta(13, 58).
+b- Below is the plot for the first salesperson's prior, likelihood, and posterior:
+```{r}
+plot_beta_binomial(8, 2, 12, 50)
+```
+Below is the plot for the second salesman:
+```{r}
+plot_beta_binomial(1, 20, 15, 50)
+```
+c- The first salesperson's posterior understanding of pi is different from the second, as the first salesperson's posterior has overall higher values (mean around .32) than the second salesperson's (mean around .20); this is due to the first salesperson's prior being higher than the second's. 
+
+Exercise 3.11
+a- In order to get a mean of roughly .25, the ratio of alpha to beta would need to be about 1:3. For the mode to be 5/22 (roughly .23), that is lower than the mean, so we can try plugging a few different values into the summarize_beta function.
+```{r}
+summarize_beta(4, 12)
+```
+This is getting close, let's try bumping it up by a bit more.
+```{r}
+summarize_beta(6, 18)
+```
+There we go! The Beta model for the staff's prior ideas about pi is Beta(6, 18), plotted below.
+```{r}
+plot_beta(6, 18)
+```
+b- Adding in the data that 15/50 of the students are bike riders, we can use the summarize_beta_binomial function to calculate the alpha and beta of the posterior model of pi:
+```{r}
+summarize_beta_binomial(6, 18, 15, 50)
+```
+The posterior model for pi is Beta(21, 53).
+c- As seen in the code above, the posterior mean is .284, mode is .278, and SD is .052.
+d- In order to answer this, I'm going to plot it to see the differences visually-
+```{r}
+plot_beta_binomial(6, 18, 15, 50)
+```
+I would say that the posterior is closer to that data; the mean is closer to the data's mean of .3, and the prior model was also wider than the posterior ended up being.
+
+Exercise 3.12
+a- Since his prior model is not entirely normal (only 5% excess on the left of the mode, 10% excess on the right of the mode), we won't be able to substitute mean here for mode. We can try using the method Steve showed in class, since we will need a more exact estimate here than the earlier non-normal Beta priors we were estimating (although here, the mean is also used in the calculation- we may need to do some adjusting and will check the values using the summarize function):
+```{r}
+#mean
+p <- .15
+#scale
+n <- 100
+quantile(rbeta(100000, p*n, (1-p)*n), c(.05, .95))
+
+alpha <- p*n
+beta <- n*(1-p)
+alpha
+beta
+```
+Now that we have two values that are near the distribution, we can check the plot to see how much adjustment we will need to make.
+```{r}
+plot_beta(15, 85)
+```
+This actually looks fairly close to what we need- I will double check to make sure that the mean/mode is about .15 befor emoving on.
+```{r}
+summarize_beta(15, 85)
+```
+The mode is a bit lower than I would like (also reflected in how the 95th percentile of the graph is only around .22 when it should be at .25), but it is close enough to continue onwards!
+b- We can calculate his posterior model by adding the 30/90 dataset:
+```{r}
+summarize_beta_binomial(15, 85, 30, 90)
+```
+The posterior model here is pi | y=30 ~ Beta(45, 145)
+c- The posterior mean (.237), mode (.234), and SD (.031) are in the above code.
+d- I will plot the posterior in order to answer this question (this is the same plot as for part b of this question):
+```{r}
+plot_beta_binomial(15, 85, 30, 90)
+```
+The posterior model is right inbetween the data and the prior; going by means alone, the mean of the prior is .15 while the mean of the data is .3, and the posterior's mean is .237 (just slightly closer to the data's mean).
+
+Exercise 3.13
+a- Sylvia's prior model here is a lot more vague than the last one- with no mean/mode given, I am going to take the liberty of making this a roughly normal distribution with a mean/mode of 47.5 and calculate using the formula Steve gave (also used in the previous problem):
+```{r}
+p <- .475
+n <- 50
+quantile(rbeta(10000, (p*n), (n*(1-p))), c(.05, .95))
+alpha <- p*n
+beta <- n*(1-p)
+alpha
+beta
+```
+This is close enough to 35-60 (36-59) that we can move on using these values of alpha and beta.
+b- I'll add in the data to the prior model to create the posterior:
+```{r}
+summarize_beta_binomial(23.75, 26.25, 80, 200)
+```
+The posterior model of pi is pi | y=80 ~ Beta(103.75, 146.25). Below is a plot of the posterior:
+```{r}
+plot_beta_binomial(23.75, 26.25, 80, 200)
+```
+c- The mean (.415), mode (.413), and SD (.03) of the posterior are in the code above (summarize function).
+d- The prior model was much more wide than the posterior; the posterior model is very similar to the data (likely due to the large dataset), and overall has lower values than the prior distribution did.
+
+Exercise 3.14
+In order to calculate the y and n values, we can use the following equations:
+Alpha posterior = alpha prior + y
+Beta posterior = beta prior + n - y
+Starting with the y value, we would substitute the alpha values into the equation:
+11= 2 + y; y=9
+Then we can plug that into the beta posterior equation to find the n value:
+24= 3 + n - 9; 24= n-6; n= 30
+Here is the input code:
+```{r}
+summarize_beta_binomial(2, 3, 9, 30)
+```
+
+Exercise 3.15
+Here we can use the same equations from the previous problem:
+100= 1 + y; y= 99
+3= 2 + n - 99; 3= n-97; n= 100
+```{r}
+summarize_beta_binomial(1, 2, 99, 100)
+```
+
+Exercise 3.16
+a- The prior model is a heavily left skewed (where essentially all values left of .9 or so have density=0), while the likelihood function is a relatively wide normal distribution on the opposite end of the model's spectrum (values hovering between .1 and .4).
+b- The values of the posterior model are closer to the prior data, but the shape itself is closer to the likelihood function. The prior model likely has a stronger influence on the posterior than the data does, so the data likely has a smaller sample size.
+c- I went on distribution zoo to find a prior similar to the one in this graph, and found the closest possible match to be (10, .5), but we should add more to the alpha value in order to narrow the distribution further. Considering that the posterior is closer to the prior than the likelihood, the data should not have a large n value, but should have a mean of roughly .2; we can try plotting with y=1 and n=5 first to see if that is close.
+```{r}
+plot_beta_binomial(40, .5, 1, 5)
+```
+The likelihood distribution here is too wide, so we can try again with larger values.
+```{r}
+plot_beta_binomial(40, .5, 5, 25)
+```
+There we go! 
+
+Exercise 3.17
+a- The prior model is a very wide normal distribution with values from 0 to 1; meanwhile, the likelihood is a steep curve on the left-side of the distribution with almost all values between 0 and .25.
+b- The posterior model is extremely similar to the likelihood; it is just a tiny bit shorter and a bit shifted to the right.
+c- I will use the same method as last time; using distribution zoo, the closest values I found to the prior were 2,2; however, this still might have too high of a peak (we can re-assess as we continue to plot test values). Since the likelihood and posterior are so close, the data should have a very large sample size (and the mean should be roughly .12). Let's try data with the value y=12 and n=100:
+```{r}
+plot_beta_binomial(2, 2, 12, 100)
+```
+This is actually pretty close! We can reduce the data's size by a bit since the posterior is overlapping a bit too much here, so let's try 6 and 50:
+```{r}
+plot_beta_binomial(2, 2, 6, 50)
+```
+There we go- that looks fairly close to the example plot!
+
+Exercise 3.18
+a- First we will use the summarize function:
+```{r}
+summarize_beta_binomial(3, 3, 30, 40)
+```
+Now we will plot it:
+```{r}
+plot_beta_binomial(3, 3, 30, 40)
+```
+Patrick's prior was a bit vague/broad, so the data had a large impact- overall the posterior model and the data showed higher values that Patrick's prior model.
+b- Below is Harold's summary analysis:
+```{r}
+summarize_beta_binomial(3, 3, 15, 20)
+```
+And here is the plot:
+```{r}
+plot_beta_binomial(3, 3, 15, 20)
+```
+c- Patrick and Harold's posterior models are fairly similar, largely because they had the same ratio/mean of the data (3/4 people attending a protest); the major difference is the scale of the data. Patrick had about twice as many responses/datapoints, so his posterior model is more narrow than Harold's. 
