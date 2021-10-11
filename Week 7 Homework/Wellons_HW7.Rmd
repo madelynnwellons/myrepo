@@ -1,0 +1,648 @@
+---
+title: "Wellons_HW7"
+author: Madelynn Wellons
+date: 10/4/21
+output: html_document
+---
+
+```{r}
+library(bayesrules)
+library(tidyverse)
+library(janitor)
+```
+
+
+Exercise 4.1
+
+a- Centering pi at .5
+
+b- Somewhat favoring pi > .5
+
+c- Strongly favoring pi < .5
+
+d- Somewhat favoring pi < .5
+
+e- Strongly favoring pi > .5
+
+
+Exercise 4.2
+
+We can rule out half of the answers because the prior matches most closely with alpha= 3 and beta= 8; the likelihood is centered in the distribution, so likely the data was showing a .5 mean (y should be half of n). Therefore, e should be the correct answer, as that is the only remaining option where the ratio of y:n is 1:2 (y=2, n=4).
+
+
+Exercise 4.3
+
+a- Since Ben is pretty certain the pi value will be low, we can select a distribution where Beta is larger than alpha to a significant degree; here our prior is Beta(3, 10)
+
+b- Since Albert has no idea, our prior should be Beta(1, 1)
+
+c- Since Katie thinks there is a "very high chance", we can select a distribution where Alpha is larger than Beta to a significant degree; here our prior is Beta(10, 3)
+
+d- Daryl is pretty unsure but his distribution should have a mean larger than .5 since he thinks there is a decent chance; we can give him a prior of Beta(3, 5)
+
+e- Scott is pretty unsure but his distribution should have a mean smaller than .5 since he thinks it likely will not happen; we can give him a prior of Beta(5, 3)
+
+
+Exercise 4.4
+
+a- Kimya's prior:
+```{r}
+plot_beta(1, 2)
+```
+Kimya thinks it is more likely that the shop will not be open, but is pretty unsure.
+
+b- Fernando's prior:
+```{r}
+plot_beta(.5, 1)
+```
+Fernando thinks it is highly unlikely for the ice cream shop to be open.
+
+c- Ciara's prior:
+```{r}
+plot_beta(3, 10)
+```
+Ciara is fairly sure that the ice cream shop will not be open but is not positive; she thinks there is roughly a 25% chance it will be open.
+
+d- Taylor's prior:
+```{r}
+plot_beta(2, .1)
+```
+Taylor thinks it is extremely likely for the ice cream shop to be open.
+
+Exercise 4.5
+a- Kimya's simulation:
+```{r}
+set.seed(0928)
+kimya_sim <- data.frame(pi = rbeta(10000, 1, 2)) |> 
+  mutate(y = rbinom(10000, size = 7, prob = pi))
+#simulating posterior
+kimya_posterior <- kimya_sim |> 
+  filter(y == 3)
+#plotting posterior
+ggplot(kimya_posterior, aes(x = pi)) +
+  geom_histogram()
+```
+Above is a plot of the posterior model we simulated; I would estimate that the mean value of pi here is around .4, but we can calculate it to be safe:
+```{r}
+kimya_posterior |> 
+  summarize(mean(pi))
+```
+b- Fernando's posterior:
+```{r}
+set.seed(0928)
+fernando_sim <- data.frame(pi = rbeta(10000, .5, 1)) |> 
+  mutate(y = rbinom(10000, size = 7, prob = pi))
+#simulating posterior
+fernando_posterior <- fernando_sim |> 
+  filter(y == 3)
+#plotting posterior
+ggplot(fernando_posterior, aes(x = pi)) +
+  geom_histogram()
+```
+I would estimate that the mean here would be around .5, but we can calculate it exactly:
+```{r}
+fernando_posterior |> 
+  summarize(mean(pi))
+```
+c- Ciara's posterior:
+```{r}
+set.seed(0928)
+ciara_sim <- data.frame(pi = rbeta(10000, 3, 10)) |> 
+  mutate(y = rbinom(10000, size = 7, prob = pi))
+#simulating posterior
+ciara_posterior <- ciara_sim |> 
+  filter(y == 3)
+#plotting posterior
+ggplot(ciara_posterior, aes(x = pi)) +
+  geom_histogram()
+```
+Here, the mean is likely around .3; we can calculate it below:
+```{r}
+ciara_posterior |> 
+  summarize(mean(pi))
+```
+d- Taylor's posterior:
+```{r}
+set.seed(0928)
+taylor_sim <- data.frame(pi = rbeta(10000, 2, .1)) |> 
+  mutate(y = rbinom(10000, size = 7, prob = pi))
+#simulating posterior
+taylor_posterior <- taylor_sim |> 
+  filter(y == 3)
+#plotting posterior
+ggplot(taylor_posterior, aes(x = pi)) +
+  geom_histogram()
+```
+Here the mean is likely to be above .5, potentially around .55 or so. Below is the calculation:
+```{r}
+taylor_posterior |> 
+  summarize(mean(pi))
+```
+
+
+Exercise 4.6
+
+a- Kimya's posterior:
+```{r}
+summarize_beta_binomial(1, 2, 3, 7)
+```
+Kimya's posterior model is Beta(4, 6) and the mean is .4; this is fairly similar to her simulation, as the means are practically identical. 
+
+b- Fernando's posterior:
+```{r}
+summarize_beta_binomial(.5, 1, 3, 7)
+```
+Fernando's posterior model is Beta(3.5, 5), and the mean is .412; this is also fairly similar to his simulation as the mean is pretty similar, but it is not as similar as Kimya's was to her simulation.
+
+c- Ciara's posterior:
+```{r}
+summarize_beta_binomial(3, 10, 3, 7)
+```
+Ciara's posterior model is Beta(6, 14) and the mean is .3; this is also extremely similar to her simulation (mean just under .3).
+
+d- Taylor's posterior:
+```{r}
+summarize_beta_binomial(2, .1, 3, 7)
+```
+Taylor posterior model is Beta(5, 4.1) and the mean is .549; this is similar to the simulation, but is off by a decent amount on the mean.
+
+
+Exercise 4.7
+
+a- The data should have more influence on the posterior 
+
+b- The prior should have much more influence than the data
+
+c- The data and prior have equal influence
+
+d- The data and prior have equal influence
+
+e- The data should have much more influence than the prior
+
+
+Exercise 4.8
+
+a- 
+```{r}
+plot_beta_binomial(1, 4, 8, 10)
+```
+Here, the prior is not a normal curve (due to alpha being 1), while both the likelihood and posterior are semi-normal curves. The posterior is closer to the likelihood than the prior, but there is significant difference between the two so the prior still has some influence.
+
+b- 
+```{r}
+plot_beta_binomial(20, 3, 0, 1)
+```
+Here, the posterior and the prior are very similar- the likelihood has little effect here since it was only one trial. The likelihood is also not a curve due to one of the values being 0/1.
+
+c- 
+```{r}
+plot_beta_binomial(4, 2, 1, 3)
+```
+Here the posterior is essentially right between the prior and the likelihood; the likelihood skews right, the prior skews left, and the posterior is right in the middle of the distribution.
+
+d- 
+```{r}
+plot_beta_binomial(3, 10, 10, 13)
+```
+This is very similar to the last example (in that the posterior is right between the prior and likelihood), but the curves are all more narrow due to the higher values of alpha/beta/y/n.
+
+e- 
+```{r}
+plot_beta_binomial(20, 2, 10, 200)
+```
+Here, the posterior and the likelihood are very similar and are both narrow, but due to the prior having such a different value/prediction from the data, there is still a significant impact on the posterior in that they are not overlapping even though the data has such a large sample size (200).
+
+
+Exercise 4.9
+
+a- We can answer this via plotting the prior:
+```{r}
+plot_beta(7, 2)
+```
+The curve covers pi values from .25 to 1, but the "most reasonable" values are between .7 and .95.
+
+b- Here we can plot the posterior:
+```{r}
+plot_beta_binomial(7, 2, 19, 20)
+```
+My understanding of pi has adjusted to be much more certain (as the curve has narrowed) and almost matches the posterior. Now I will calculate the means:
+```{r}
+summarize_beta_binomial(7, 2, 19, 20)
+```
+My understanding got more certain (SD and variance decreased) and my understanding changed as I now view the mean as a higher value (.9 instead of .78).
+
+c- Here we can plot the posterior:
+```{r}
+plot_beta_binomial(7, 2, 1, 20)
+```
+My understanding about pi has adjusted significantly; the distribution shifted to the left by a large amount and is hovering around a value of .25 as opposed to the original mean value of my prior (.78).
+
+d- Here we can plot the posterior:
+```{r}
+plot_beta_binomial(7, 2, 10, 20)
+```
+My understanding of pi has shifted and gotten a bit narrower; it shifted to the left and become more of a normal distribution as opposed to a skewed one.
+
+
+Exercise 4.10
+
+a- For this problem and all of the following, we can use the posterior model equation to solve for the data; the formula is as follows:
+
+Alpha(posterior) = alpha(prior) + y
+
+Beta(posterior) = beta(prior) + n - y
+
+We can mutate these to be the following:
+
+y = Alpha(posterior) - alpha(prior)
+
+n = Beta(posterior) - beta(prior) + y
+
+We will solve for y and then n respectively for each problem.
+```{r}
+#y
+8.5-.5
+#n
+2.5-.5+8
+```
+The data here was y=8, n=10. Below is the plot:
+```{r}
+plot_beta_binomial(.5, .5, 8, 10)
+```
+b- Below is the calculation of y and n:
+```{r}
+#y
+3.5-.5
+#n
+10.5-.5+3
+```
+The data here is y=3, n=13. Below is the plot:
+```{r}
+plot_beta_binomial(.5, .5, 3, 13)
+```
+c- Below is the calculation of y and n:
+```{r}
+#y
+12-10
+#n
+15-1+2
+```
+The data here is y=2, n=16. Below is the plot:
+```{r}
+plot_beta_binomial(10, 1, 2, 16)
+```
+d- Below is the calculation for y and n:
+```{r}
+#y
+15-8
+#n
+6-3+7
+```
+The data here is y=7, n=10. Below is the plot:
+```{r}
+plot_beta_binomial(8, 3, 7, 10)
+```
+e- Below is the calculation for y and n:
+```{r}
+#y
+5-2
+#n
+5-2+3
+```
+The data here was y=3 n=6. Below is the plot:
+```{r}
+plot_beta_binomial(2, 2, 3, 6)
+```
+f- Below is the calculation of y and n:
+```{r}
+#y
+30-1
+3-1+29
+```
+Here the data was y=29 and n=31; below is the plot:
+```{r}
+plot_beta_binomial(1, 1, 29, 31)
+```
+
+
+Exercise 4.11
+a- For this and the following problems, we can use the prior and data to calculate the posterior model using the following equations:
+
+Alpha(posterior) = alpha(prior) + y
+
+Beta(posterior) = beta(prior) + n - y
+
+Below is the calculation of the posterior model:
+```{r}
+#alpha
+1+10
+#beta
+1+13-10
+```
+The posterior model here is (11, 4); below is the plot:
+```{r}
+plot_beta_binomial(1, 1, 10, 13)
+```
+b- Below is the posterior model calculation:
+```{r}
+#alpha
+1+0
+#beta
+1+1-0
+```
+The posterior model is (1,2) plotted below:
+```{r}
+plot_beta_binomial(1, 1, 0, 1)
+```
+c- Below is the calculation of the posterior:
+```{r}
+#alpha
+1+100
+#beta
+1+130-100
+```
+The posterior is (101, 31), plotted below:
+```{r}
+plot_beta_binomial(1, 1, 100, 130)
+```
+d- Below is the calculation for the posterior:
+```{r}
+#alpha
+1+20
+#beta
+1+120-20
+```
+The posterior model is (21, 101), plotted below:
+```{r}
+plot_beta_binomial(1, 1, 20, 120)
+```
+e- Below is the calculation of the posterior:
+```{r}
+#alpha
+1+234
+#beta
+1+468-234
+```
+The posterior is (235, 235), plotted below:
+```{r}
+plot_beta_binomial(1, 1, 234, 468)
+```
+
+
+Exercise 4.12
+a- Below is the calculation of the posterior:
+```{r}
+#alpha
+10+10
+#beta
+2+13-10
+```
+The posterior is (20, 5), plotted below:
+```{r}
+plot_beta_binomial(10, 2, 10, 13)
+```
+b- Below is the calculation for the posterior:
+```{r}
+#alpha
+10+0
+#beta
+2+1-0
+```
+The posterior is (10, 3); plotted below:
+```{r}
+plot_beta_binomial(10, 2, 0, 1)
+```
+c- Below is the calculation for the posterior:
+```{r}
+#alpha
+10+100
+#beta
+2+120-100
+```
+The posterior is (110, 22); plotted below:
+```{r}
+plot_beta_binomial(10, 2, 100, 130)
+```
+d- Below is the calculation of the posterior:
+```{r}
+#alpha
+10+20
+#beta
+2+120-20
+```
+The posterior is (30, 102) plotted below:
+```{r}
+plot_beta_binomial(10, 2, 30, 102)
+```
+e- Below is the calculation of the posterior:
+```{r}
+#alpha
+10+234
+#beta
+2+468-234
+```
+The posterior is (244, 236) plotted below:
+```{r}
+plot_beta_binomial(10, 2, 234, 468)
+```
+
+
+Exercise 4.15
+
+a- We can calculate each new posterior using the summarize_beta_binomial function, the first one (prior being 2, 3) below:
+```{r}
+summarize_beta_binomial(2, 3, 1, 1)
+```
+The posterior is (3, 3).
+
+b- Prior is (3, 3); calculating new posterior below:
+```{r}
+summarize_beta_binomial(3, 3, 1, 1)
+```
+The posterior is (4, 3).
+
+c- Prior is (4, 3); calculating new posterior below:
+```{r}
+summarize_beta_binomial(4, 3, 0, 1)
+```
+The posterior is (4, 4).
+
+d- Prior is (4, 4); calculating new posterior below:
+```{r}
+summarize_beta_binomial(4, 4, 1, 1)
+```
+The posterior is (5, 4).
+
+Exercise 4.16
+
+a- Prior is (2, 3); calculating new posterior below:
+```{r}
+summarize_beta_binomial(2, 3, 3, 5)
+```
+The posterior is (5, 5).
+
+b- Prior is (5, 5); calculating posterior below:
+```{r}
+summarize_beta_binomial(5, 5, 1, 5)
+```
+The posterior is (6, 9).
+
+c- Prior is (6, 9); calculating posterior below:
+```{r}
+summarize_beta_binomial(6, 9, 1, 5)
+```
+The posterior is (7, 13).
+
+d- Prior is (7, 13); calculating the posterior below:
+```{r}
+summarize_beta_binomial(7, 13, 2, 5)
+```
+The posterior is (9, 16).
+
+
+Exercise 4.17
+
+a- Below is the plot of the prior:
+```{r}
+plot_beta(4, 3)
+```
+The employees' prior understanding of the chance that a user will click on the ad is fairly vague/broad, but they think it is more likely than not that a user will click on the ad.
+
+b- We can use the summarize function to determine the posterior models for each employee:
+```{r}
+#Employee 1
+summarize_beta_binomial(4, 3, 0, 1)
+```
+The first employee's posterior is (4, 4).
+```{r}
+#Employee 2
+summarize_beta_binomial(4, 3, 3, 10)
+```
+The second employee's posterior is (7, 10).
+```{r}
+#Employee 3
+summarize_beta_binomial(4, 3, 20, 100)
+```
+The third employee's posterior is (24, 83).
+
+c- Below are the plots for each employee:
+```{r}
+#Employee 1 plot
+plot_beta_binomial(4, 3, 0, 1)
+```
+```{r}
+#Employee 2
+plot_beta_binomial(4, 3, 3, 10)
+```
+```{r}
+#Employee 3
+plot_beta_binomial(4, 3, 20, 100)
+```
+d- Overall, the data that each employee received had a similar rate (between 2-3 people clicking on ads for every 10 people allotted; this was rounded down to 0 for the employee with only 1 observation). However, as the sample size increased, the effect that the data had on the posterior model grew stronger. For example, Employee 3 had 100 observations and their posterior nearly overlaps the likelihood; meanwhile, Employee 2 has 10 observations, and there is still significant overlap between the prior and the posterior. 
+
+
+Exercise 4.18
+
+a- We can use the summarize function to calculate the posterior here. At the end of day 1, since they are only using Employee 1's data, their posterior will be the same as Employee 1's (4, 4). Now to calculate day 2's:
+```{r}
+#Day 2
+summarize_beta_binomial(4, 4, 3, 10)
+```
+At the end of the second day, the employee's posterior is (7, 11). Below is the calculation for the final day:
+```{r}
+#Day 3
+summarize_beta_binomial(7, 11, 20, 100)
+```
+Their final posterior is (27, 91).
+
+b- First is the sketch of the prior and first posterior (day 1):
+```{r}
+plot_beta_binomial(4, 3, 0, 1)
+```
+Similar to Employee 1, after receiving the single observation the data is not enough to completely change their minds, but they do overall think that slightly less people may click on the ads.
+```{r}
+#Day 2
+plot_beta_binomial(4, 4, 3, 10)
+```
+On the second day, their prior only slightly more specific than Employee 2's, the data they received caused their understanding to narrow and for them to believe that there is a higher chance that significantly less people view the ads.
+```{r}
+#Day 3
+plot_beta_binomial(7, 11, 20, 100)
+```
+Now, after the third day, they have significantly changed their point of view with the mean of pi hovering around .2 and a much more narrow understanding (nearly matching the likelihood).
+
+c- The posterior model will be the same as that from part a Day 3. Below is a calculation of the new posterior:
+```{r}
+#prior is the original (4, 3)
+#n=111
+#y=23
+summarize_beta_binomial(4, 3, 23, 111)
+```
+The posterior model of pi is (27, 91) both here and at day 3 in part a.
+
+
+Exercise 4.19
+
+a- First we will need to load this dataset, then filter it to the correct year:
+```{r}
+data(bechdel, package = "bayesrules")
+bechdel |> 
+  filter(year == 1980) |> 
+  tabyl(binary) |> 
+  adorn_totals("row")
+```
+The data he has from this year is y=4, n=14. With the prior of (1, 1) we can calculate his posterior below:
+```{r}
+summarize_beta_binomial(1, 1, 4, 14)
+```
+His posterior is (5, 11) with a mean of .3125 and a mode of .2857.
+
+b- Using the new prior of (5, 11) we can filter the data from 1990 to gather the new data:
+```{r}
+bechdel |> 
+  filter(year == 1990) |> 
+  tabyl(binary) |> 
+  adorn_totals("row")
+```
+Here his values are y=6 and n=15; we can calculate the posterior below:
+```{r}
+summarize_beta_binomial(5, 11, 6, 15)
+```
+His posterior model is (11, 20) with a mean of .3548 and a mode of .3448.
+
+c- With a new prior of (11, 20) we can take the data and filter it to the year 2000 to obtain the final day of data.
+```{r}
+bechdel |> 
+  filter(year == 2000) |> 
+  tabyl(binary) |> 
+  adorn_totals("row")
+```
+Here the data is y=29, n=63. Below we can calculate the final posterior:
+```{r}
+summarize_beta_binomial(11, 20, 29, 63)
+```
+John's final posterior model is (40, 54) with a mean of .4255 and a mode of .4239.
+
+d- Jenna's posterior will be (40, 54) since she is using the same data as John, but we can re-calculate it below.
+```{r}
+#prior is the original (1, 1)
+#y=29+6+4 = 39
+#n=14+15+63 = 92
+summarize_beta_binomial(1, 1, 39, 92)
+```
+Jenna's posterior is (40, 54) with a mean of .4255 and a mode of .4239.
+
+
+Exercise 4.20
+
+Since frequentists examine "long run data" they would not sequentially update their understanding; however, it is true that their final update should be the same as the Bayesian (as they are combining all the data- the only way that they calculate) when Bayesians do their sequential posteriors.
+
+
+
+
+
+
+
+
+
+
