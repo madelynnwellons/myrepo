@@ -1,0 +1,704 @@
+---
+title: "Wellons_HW8"
+author: "Madelynn Wellons"
+date: "10/13/2021"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(rstan)
+library(bayesplot)
+library(bayesrules)
+```
+
+
+Exercise 6.1
+
+a- First, you would turn the possible pi values into a finite grid (the more values, the more clear/accurate the approximation will be). Then, you would input the prior and the likelihood into the R function/into the dataset grid for this approximation in R. Then, you would calculate the likelihood and prior for each grid value, and then normalize it by dividing each value by the collective sum of values. That gives you the values for each pi "slice" that you input earlier, and you can graph this to see a visual version of the grid approximation. You can also go ahead and simulate it if you would like to check your approximation.
+
+b- I would make more pi "slices", as the larger the number of slices, the more accurate the approximation is. I would change it by adjusting the "values" portion of the R code in the first step to be a higher number.
+
+
+Exercise 6.2
+Below are my plots:
+```{r}
+knitr::include_graphics("/Users/madelynnwellons/Pictures/HW8Plots.png")
+```
+
+Exercise 6.3
+
+a- When a chain mixes slowly, the posterior will have higher levels of error, usually in increased probability in a specific range of pi values (the values that it has taken the time to "explore")
+
+b- When a chain has high correlation, it acts as though it is slowly mixing (it has high correlation between other values but will slowly self-correct) and so the same answer as above would apply here.
+
+c- When a chain gets "stuck", it is oversampling some values and so it will have a higher density at the wrong pi points (e.g. higher density than there should be on the tail of a distribution)
+
+
+Exercise 6.4
+
+a- It is important to look at MCMC diagnostics to ensure that there were no issues with the chains, as if there were then the posterior model would be very off.
+
+b- MCMC simulations are helpful because they can approximate posteriors quickly that are impossible to calculate by hand and would take hours/days to simulate properly.
+
+c- RStan allows you to use Stan code in order to create the data model that the MCMC will be using.
+
+d- I understand most of the chapter, I am just having trouble figuring out when we would actually use this- Nico mentioned that we wouldn't since there are better approximation methods out there now, but why did people use this in the first place?
+
+
+Exercise 6.5
+
+a- 
+First we will check what the posterior should be from an analytical standpoint:
+```{r}
+summarize_beta_binomial(3, 8, 2, 10)
+```
+We know that the posterior should be (5, 16), this will come in handy later.
+
+Now we will split up the pi values in the grid:
+```{r}
+grid_data65 <- data.frame(pi_grid = seq(from = 0, to = 1, length = 5))
+```
+Then we will use dbeta and dbinom to evaluate the prior and likelihood given the data:
+```{r}
+grid_data65 <- grid_data65 |> 
+  mutate(prior = dbeta(pi_grid, 3, 8),
+         likelihood = dbinom(2, 10, pi_grid))
+```
+```{r}
+#Step 3: approximate the posterior
+grid_data65 <- grid_data65 |> 
+  mutate(unnormalized = likelihood * prior,
+         posterior = unnormalized / sum(unnormalized))
+#Confirming that posterior approximation sums to 1
+grid_data65 |> 
+  summarize(sum(unnormalized), sum(posterior))
+
+```
+```{r}
+#Examine the grid approx. posterior
+round(grid_data65, 2)
+```
+```{r}
+#Plot grid approx. posterior
+ggplot(grid_data65, aes(x = pi_grid, y = posterior)) +
+  geom_point() +
+  geom_segment(aes(x = pi_grid, xend = pi_grid, y = 0, yend = posterior))
+```
+```{r}
+#Sample from discretized posterior
+set.seed(3456)
+post_sample65 <- sample_n(grid_data65, size = 10000,
+                          weight = posterior, replace = TRUE)
+post_sample65 |> 
+  tabyl(pi_grid) |> 
+  adorn_totals("row")
+```
+```{r}
+#Histogram of grid simulation with posterior pdf
+ggplot(post_sample65, aes(x = pi_grid)) +
+  geom_histogram(aes(y = ..density..), color = "white") +
+  stat_function(fun = dbeta, args = list(5, 16)) +
+  lims(x = c(0, 1))
+```
+
+b- 
+We can likely better approximate the posterior with more "slices"- in the graph above, you can see how only having the points for a few select pi values makes it not as accurate when compared to the real posterior. 
+
+
+Now we will split up the pi values in the grid:
+```{r}
+grid_data65b <- data.frame(pi_grid = seq(from = 0, to = 1, length = 201))
+```
+Then we will use dbeta and dbinom to evaluate the prior and likelihood given the data:
+```{r}
+grid_data65b <- grid_data65b |> 
+  mutate(prior = dbeta(pi_grid, 3, 8),
+         likelihood = dbinom(2, 10, pi_grid))
+```
+```{r}
+#Step 3: approximate the posterior
+grid_data65b <- grid_data65b |> 
+  mutate(unnormalized = likelihood * prior,
+         posterior = unnormalized / sum(unnormalized))
+#Confirming that posterior approximation sums to 1
+grid_data65b |> 
+  summarize(sum(unnormalized), sum(posterior))
+
+```
+
+```{r}
+#Plot grid approx. posterior
+ggplot(grid_data65b, aes(x = pi_grid, y = posterior)) +
+  geom_point() +
+  geom_segment(aes(x = pi_grid, xend = pi_grid, y = 0, yend = posterior))
+```
+```{r}
+set.seed(3456)
+post_sample65b <- sample_n(grid_data65b, size = 10000,
+                          weight = posterior, replace = TRUE)
+post_sample65b |> 
+  tabyl(pi_grid) |> 
+  adorn_totals("row")
+```
+
+```{r}
+#Histogram of grid simulation with posterior pdf
+ggplot(post_sample65b, aes(x = pi_grid)) +
+  geom_histogram(aes(y = ..density..), color = "white") +
+  stat_function(fun = dbeta, args = list(5, 16)) +
+  lims(x = c(0, 1))
+```
+
+Exercise 6.6
+
+a- 
+We can follow similar steps as we did in the last problem, but adjusting it for Gamma-Poisson.
+```{r}
+# Step 1: Define a grid
+grid_data6 <- data.frame(lambda_grid = seq(from = 0, to = 8, length = 9))
+
+# Step 2: Evaluate the prior & likelihood at each lambda
+grid_data6 <- grid_data6 |> 
+  mutate(prior = dgamma(lambda_grid, 20, 5),
+         likelihood = dpois(0, lambda_grid) * dpois(1, lambda_grid) * dpois(0, lambda_grid))
+
+# Step 3: Approximate the posterior
+grid_data6 <- grid_data6 |> 
+  mutate(unnormalized = likelihood * prior,
+         posterior = unnormalized / sum(unnormalized))
+
+# Set the seed
+set.seed(4635)
+
+# Step 4: sample from the discretized posterior
+post_sample6 <- sample_n(grid_data6, size = 10000, 
+                        weight = posterior, replace = TRUE)
+```
+Now we can check what the value of the posterior should be analytically:
+```{r}
+summarize_gamma_poisson(20, 5, 1, 3)
+```
+
+Now we can plot this on the histogram:
+```{r}
+# Histogram of the grid simulation with posterior pdf 
+ggplot(post_sample6, aes(x = lambda_grid)) + 
+  geom_histogram(aes(y = ..density..), color = "white") + 
+  stat_function(fun = dgamma, args = list(21, 8)) + 
+  lims(x = c(0, 8))
+```
+
+b-
+Now we can try that all again but with 201 grid values!
+```{r}
+# Step 1: Define a grid
+grid_data6b <- data.frame(lambda_grid = seq(from = 0, to = 8, length = 201))
+
+# Step 2: Evaluate the prior & likelihood at each lambda
+grid_data6b <- grid_data6b |> 
+  mutate(prior = dgamma(lambda_grid, 20, 5),
+         likelihood = dpois(0, lambda_grid) * dpois(1, lambda_grid) * dpois(0, lambda_grid))
+
+# Step 3: Approximate the posterior
+grid_data6b <- grid_data6b |> 
+  mutate(unnormalized = likelihood * prior,
+         posterior = unnormalized / sum(unnormalized))
+
+# Set the seed
+set.seed(4635)
+
+# Step 4: sample from the discretized posterior
+post_sample6b <- sample_n(grid_data6b, size = 10000, 
+                        weight = posterior, replace = TRUE)
+```
+
+Now we can plot this on the histogram:
+```{r}
+# Histogram of the grid simulation with posterior pdf 
+ggplot(post_sample6b, aes(x = lambda_grid)) + 
+  geom_histogram(aes(y = ..density..), color = "white") + 
+  stat_function(fun = dgamma, args = list(21, 8)) + 
+  lims(x = c(0, 8))
+```
+
+
+Exercise 6.7
+
+a- Here we will once again use the same methods to create the grid approximation (but adjusting the code for it being a normal-normal):
+```{r}
+# Step 1: Define a grid
+grid_data7 <- data.frame(mu_grid = seq(from = 5, to = 15, length = 11))
+```
+
+```{r}
+# Step 2: Evaluate the prior & likelihood at each mu- similar to last two but code differs as the mean is the first value in the prior and the sd is the second, and similarly for the posterior
+grid_data7 <- grid_data7 |> 
+  mutate(prior = dnorm(mu_grid, mean = 10, sd = 1.2),
+         likelihood = dnorm(7.1, mean = mu_grid, sd = 1.3)*
+           dnorm(8.9, mean = mu_grid, sd = 1.3)*
+           dnorm(8.4, mean = mu_grid, sd = 1.3)*
+           dnorm(8.6, mean = mu_grid, sd = 1.3))
+```
+```{r}
+#Step 3: approximate the posterior, this is almost identical to our usual code here
+grid_data7 <- grid_data7 %>% 
+  mutate(unnormalized = likelihood * prior,
+         posterior = unnormalized / sum(unnormalized))
+
+ggplot(grid_data7, aes(x = mu_grid, y = posterior)) + 
+  geom_point() + 
+  geom_segment(aes(x = mu_grid, xend = mu_grid, y = 0, yend = posterior))
+```
+I now realize that we didn't actually have to do the simulations for the last few questions as the code that was given to us for the normal-normal didn't include that, sorry that there is extra code to review!! 
+
+b-
+Now we can do the same thing, but with 201 mu values!
+```{r}
+# Step 1: Define a grid
+grid_data7b <- data.frame(mu_grid = seq(from = 5, to = 15, length = 201))
+
+# Step 2: Evaluate the prior & likelihood at each mu
+grid_data7b <- grid_data7b |> 
+  mutate(prior = dnorm(mu_grid, mean = 10, sd = 1.2),
+         likelihood = dnorm(7.1, mean = mu_grid, sd = 1.3)*
+           dnorm(8.9, mean = mu_grid, sd = 1.3)*
+           dnorm(8.4, mean = mu_grid, sd = 1.3)*
+           dnorm(8.6, mean = mu_grid, sd = 1.3))
+
+#Step 3: approximate the posterior
+grid_data7b <- grid_data7b %>% 
+  mutate(unnormalized = likelihood * prior,
+         posterior = unnormalized / sum(unnormalized))
+
+ggplot(grid_data7b, aes(x = mu_grid, y = posterior)) + 
+  geom_point() + 
+  geom_segment(aes(x = mu_grid, xend = mu_grid, y = 0, yend = posterior))
+```
+
+
+Exercise 6.8
+
+a- One situation in which we might want inference for multiple parameters is if you are wanting to estimate both the height and weight of a child based on their age (height being one variable, weight being another).
+
+b- Dimensionality adds another layer ("dimension") or axis to the grid approximation; this causes us to need an incredibly large amount of pi/lambda/mu "slices" in order to get a decent approximation of the posterior (e.g. if you need 100 on each axis, you'd now need to calculate 10000 values in this approximation, whereas if it was one-dimensional you would only need 100). This is a curse because it makes it nearly impossible to get a good grid approximation without the analysis taking too long.
+
+
+Exercise 6.9
+
+a- Both MCMC and grid approximation are approximations of the true posterior (not an exact analytical calculation)
+
+b- Both MCMC and grid approximation can approximate the posterior for those that we cannot calculate analytically (or at least it would be very difficult to do so)
+
+c- Grid approximation has the advantage of each value being independent from another, and that reduces the likelihood of error that comes with MCMC
+
+d- MCMC has the advantage of being able to calculate more complex posteriors in a very quick amount of time compared to grid approximation.
+
+
+Exercise 6.10
+
+a- Yes, this is a Markov chain; each day is dependent on the last (e.g. you would likely not order it two days in a row)
+
+b- No, this is not a Markov chain, as the values are independent
+
+c- Yes, this is a Markov chain; each day you learn more from your chess matches with your roommate (and vice versa) so each day is dependent on the rest.
+
+
+Exercise 6.11
+
+a- Below is the code for the rstan model for this problem:
+```{r}
+bb_model <- "
+  data {
+    int<lower = 0, upper = 20> Y;
+  }
+  parameters {
+    real<lower = 0, upper = 1> pi;
+  }
+  model {
+    Y ~ binomial(20, pi);
+    pi ~ beta(1, 1);
+  }
+"
+```
+
+b-
+```{r}
+#I have no value here for the number of observations since it was not given in the text
+gp_model <- "
+  data {
+    int<lower = 0> Y;
+  }
+  parameters {
+    real<lower = 0> lambda;
+  }
+  model {
+    Y ~ poisson(lambda);
+    lambda ~ gamma(4, 2);
+  }
+"
+```
+
+c-
+```{r}
+normal_model <- '
+data {
+    vector[] Y; //Once again the value was not given so I am leaving the vector[] blank here 
+} 
+parameters {
+    real mu;
+} 
+model {
+   Y ~ normal(mu, 1); //This is the (mu, 1^2) we were given in the problem
+   mu ~ normal(0, 10); //This is the (0, 10^2) prior we were given in the problem
+}
+'
+```
+
+
+Exercise 6.12
+
+a- 
+```{r}
+#Step 1: defining the model
+bb_model <- "
+  data {
+    int<lower = 0, upper = 20> Y;
+  }
+  parameters {
+    real<lower = 0, upper = 1> pi;
+  }
+  model {
+    Y ~ binomial(20, pi);
+    pi ~ beta(1, 1);
+  }
+"
+
+#Step 2: simulate the posterior
+bb_sim <- stan(model_code = bb_model, data = list(Y = 12),
+               chains = 4, iter = 5000*2, seed = 1234)
+```
+
+b-
+The model here will be the same as in 6.11, but we will have defined the number of observations since we only have one datapoint for Y:
+```{r}
+#Step 1: define the model
+gp_model <- "
+  data {
+    int<lower = 0> Y[1];
+  }
+  parameters {
+    real<lower = 0> lambda;
+  }
+  model {
+    Y ~ poisson(lambda);
+    lambda ~ gamma(4, 2);
+  }
+"
+
+#Step 2: simulate the posterior
+gp_sim <- stan(model_code = gp_model, data = list(Y = c(3)),
+               chains = 4, iter = 5000*2, seed = 1234)
+```
+
+c-
+The model here will be the same as in 6.11, but we will have defined the number of observations since we only have one datapoint for Y:
+```{r}
+#step 1: define the model
+normal_model <- '
+data {
+    vector[1] Y; 
+} 
+parameters {
+    real mu;
+} 
+model {
+   Y ~ normal(mu, 1); //This is the (mu, 1^2) we were given in the problem
+   mu ~ normal(0, 10); //This is the (0, 10^2) prior we were given in the problem
+}
+'
+
+#Step 2: simulate the posterior
+gn_sim <- stan(model_code = normal_model, data = list(Y = c(12.2)), #Here I adjusted Nico's code since he made this based on the earlier problem with 4 values- I left the data in since it was only one value and did not create a vector like he did
+               chains = 4, iter = 5000*2, seed = 1234)
+```
+
+
+Exercise 6.13
+
+a- 
+```{r}
+#Step 1: defining the model
+bb_model <- "
+  data {
+    int<lower = 0, upper = 10> Y;
+  }
+  parameters {
+    real<lower = 0, upper = 1> pi;
+  }
+  model {
+    Y ~ binomial(10, pi);
+    pi ~ beta(3, 8);
+  }
+"
+
+#Step 2: simulate the posterior
+bb_sim <- stan(model_code = bb_model, data = list(Y = 2),
+               chains = 3, iter = 12000, seed = 1234)
+```
+
+b-
+```{r}
+#Creating trace plot
+mcmc_trace(bb_sim, pars = "pi", size = .1)
+```
+
+c- The x-axis has values of 0 to 6000; it only goes to 6000 instead of 12000 because it removed the first half of the values as the "burn in" period.
+
+d- Below are the density plots for individual chains:
+```{r}
+mcmc_dens_overlay(bb_sim, pars = "pi") +
+  ylab("density")
+```
+
+e- Below is the calculation of the posterior model:
+```{r}
+#alpha posterior = alpha prior + y
+3+2
+#beta posterior = beta prior + n - y
+8+10-2
+```
+The posterior here should be (5, 16); I am unsure of how to plot the MCMC density plot over the posterior, but I will plot the posterior below so we can compare:
+```{r}
+plot_beta_binomial(3, 8, 2, 10)
+```
+
+The posterior here does look similar to our density plot!
+
+
+Exercise 6.14
+
+a- 
+```{r}
+#Step 1: defining the model
+bb_model <- "
+  data {
+    int<lower = 0, upper = 12> Y;
+  }
+  parameters {
+    real<lower = 0, upper = 1> pi;
+  }
+  model {
+    Y ~ binomial(12, pi);
+    pi ~ beta(4, 3);
+  }
+"
+
+#Step 2: simulate the posterior
+bb_sim <- stan(model_code = bb_model, data = list(Y = 4),
+               chains = 3, iter = 12000, seed = 1234)
+```
+
+b-
+```{r}
+#Creating trace plot
+mcmc_trace(bb_sim, pars = "pi", size = .1)
+```
+
+c- The x-axis has values of 0 to 6000; it only goes to 6000 instead of 12000 because it removed the first half of the values as the "burn in" period.
+
+d- Below are the density plots for individual chains:
+```{r}
+mcmc_dens_overlay(bb_sim, pars = "pi") +
+  ylab("density")
+```
+
+```{r}
+#alpha posterior = alpha prior + y
+4+4
+#beta posterior = beta prior + n - y
+3+12-4
+```
+The posterior here should be (8, 11); once again, I am unsure of how to plot the MCMC density plot over the posterior, but I will plot the posterior below so we can compare:
+```{r}
+plot_beta_binomial(4, 3, 4, 12)
+```
+
+This also looks quite similar, although it looks like Chain 1 was the closest (as it had a slightly higher peak than the other 2 chains).
+
+
+Exercise 6.15
+
+a- 
+```{r}
+#Step 1: define the model
+gp_model <- "
+  data {
+    int<lower = 0> Y[3];
+  }
+  parameters {
+    real<lower = 0> lambda;
+  }
+  model {
+    Y ~ poisson(lambda);
+    lambda ~ gamma(20, 5);
+  }
+"
+
+#Step 2: simulate the posterior
+gp_sim <- stan(model_code = gp_model, data = list(Y = c(0, 1, 0)),
+               chains = 4, iter = 10000, seed = 1234)
+```
+
+b- 
+```{r}
+#Creating trace plot
+mcmc_trace(gp_sim, pars = "lambda", size = .1)
+```
+
+```{r}
+#density plot for the 4 chains
+mcmc_dens_overlay(gp_sim, pars = "lambda") +
+  ylab("density")
+```
+
+c- The most posterior plausible value of lambda appears to be about 2.6 or 2.7
+
+d- We can find the exact posterior using the summarize_gamma_poisson function:
+```{r}
+summarize_gamma_poisson(20, 5, 1, 3)
+```
+My approximation seems fairly close! The estimated mean and mode are close to my estimate of the most likely value of lambda.
+
+
+Exercise 6.16
+
+a- 
+```{r}
+#Step 1: define the model
+gp_model <- "
+  data {
+    int<lower = 0> Y[3];
+  }
+  parameters {
+    real<lower = 0> lambda;
+  }
+  model {
+    Y ~ poisson(lambda);
+    lambda ~ gamma(5, 5);
+  }
+"
+
+#Step 2: simulate the posterior
+gp_sim <- stan(model_code = gp_model, data = list(Y = c(0, 1, 0)),
+               chains = 4, iter = 10000, seed = 1234)
+```
+
+b- 
+```{r}
+#Creating trace plot
+mcmc_trace(gp_sim, pars = "lambda", size = .1)
+```
+
+```{r}
+#density plot for the 4 chains
+mcmc_dens_overlay(gp_sim, pars = "lambda") +
+  ylab("density")
+```
+
+c- The most plausible posterior value of lambda seems to be about .6!
+
+d- We can once again use the summarize function to determine the posterior model:
+```{r}
+summarize_gamma_poisson(5, 5, 1, 3)
+```
+Here the posterior is (6, 8) and it appears to be relatively close to my MCMC approximation based on the mean and mode values!
+
+
+Exercise 6.17
+
+a- 
+```{r}
+normal_model <- '
+data {
+    vector[4] Y; 
+} 
+parameters {
+    real mu;
+} 
+model {
+   Y ~ normal(mu, 1.3);
+   mu ~ normal(10, 1.2);
+}
+'
+
+d <- list(Y = c(7.1, 8.9, 8.4, 8.6)) #this time since there is more than one observation I will do what Nico did and put the values into a vector
+gn_sim <- stan(model_code = normal_model, data = d, 
+               chains = 4, iter = 10000, seed = 1234)
+```
+
+b- 
+```{r}
+#Creating trace plot
+mcmc_trace(gn_sim, pars = "mu", size = .1)
+```
+```{r}
+#density plot for the 4 chains
+mcmc_dens_overlay(gn_sim, pars = "mu") +
+  ylab("density")
+```
+
+c- The most psterior plausible value of mu appears to be about 8.7
+
+d- Here we can use the summarize normal normal function to calculate the posterior:
+```{r}
+summarize_normal_normal(10, 1.2, 1.3, mean(c(7.1, 8.9, 8.4, 8.6)), 4)
+```
+Once again, this also seems very close to my MCMC approximation based on the mean/mode! Here the distribution would be (8.65, .57) rounded to 2 decimal points.
+
+
+Exercise 6.18
+
+a- 
+```{r}
+normal_model <- '
+data {
+    vector[5] Y; 
+} 
+parameters {
+    real mu;
+} 
+model {
+   Y ~ normal(mu, 8);
+   mu ~ normal(-14, 2);
+}
+'
+
+d <- list(Y = c(-10.1, 5.5, .1, -1.4, 11.5)) #this time since there is more than one observation I will do what Nico did and put the values into a vector
+gn_sim <- stan(model_code = normal_model, data = d, 
+               chains = 4, iter = 10000, seed = 1234)
+```
+
+b-
+```{r}
+#Creating trace plot
+mcmc_trace(gn_sim, pars = "mu", size = .1)
+```
+```{r}
+#density plot for the 4 chains
+mcmc_dens_overlay(gn_sim, pars = "mu") +
+  ylab("density")
+```
+
+c- Here the most likely posterior value of mu appears to be roughly -11 or -10.
+
+d- Below is the calculated posterior:
+```{r}
+summarize_normal_normal(-14, 2, 8, mean(c(-10.1, 5.5, .1, -1.4, 11.5)), 5)
+```
+The posterior here is (-10.4, 1.75) rounded to 2 decimal points, and appears to be very close to our approximated posterior based on the mean/mode!
+
+
+
+
