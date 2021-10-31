@@ -1,0 +1,534 @@
+---
+title: "Wellons_HW10"
+author: "Madelynn Wellons"
+date: "10/26/2021"
+output: html_document
+---
+
+```{r}
+# Load packages
+library(bayesrules)
+library(tidyverse)
+library(rstan)
+library(rstanarm)
+library(bayesplot)
+library(tidybayes)
+library(janitor)
+library(broom.mixed)
+```
+
+Exercise 9.1
+
+a- A normal prior is reasonable here because there should be a mean/mode that are the same, with the spread roughly equal on each side
+
+b- A normal prior is not reasonable here because sigma is an exponential distribution (and cannot be less than 0), which does not match with a normal distribution
+
+c- A vague prior does not really show any knowledge of the problem/distribution and has a large variance (one example is the straight line), while a weakly informative prior has some very small intuition as to what the possible values for the data could be.
+
+
+Exercise 9.2
+
+a- X= arm length; Y= height
+
+b- X= distance between home+work; Y= carbon footprint (annual CO2 emissions)
+
+c- X= age; Y= vocabulary level
+
+d- X= sleep habits; Y= reaction time
+
+
+Exercise 9.3
+
+a- Bo would be the height of a baby kangaroo when it is first born and B1 would be the increase in height for each month increase in age for the kangaroo; this B1 is likely positive, as the older you get, the taller you become on average
+
+b- Bo would be the number of GitHub followers someone has when they have 0 commits in the past week and B1 would be the increase in followers someone has per each commit they gain in a week; this B1 is likely positive, as researchers who contribute more should have more followers
+
+c- Bo would be the number of visitors to a local park on a day with 0 inches of rainfall and B1 would be the change in visitors to a park per each inch of rain; this B1 is likely negative, as people are less likely to want to go to a park when it is raining
+
+d- Bo would be the number of hours of Netflix that a person watches if they never slept (which would not be good!) and B1 would be the change in hours of Netflix that a person watches as they sleep another hour; I would estimate that this is likely negative since people tend to watch Netflix at night, and if they are sleeping more there are less hours in the evening available for them to watch Netflix.
+
+
+Exercise 9.4
+
+As the strength of the relationship between Y and X increases (becomes more strong), the variance should decrease as the spread should be smaller (since X should be better at predicting Y).
+
+
+Exercise 9.5
+
+a- X= age in years; Y= annual orange juice consumption in gallons
+
+b- Y= N(u, sigma^2)
+
+c- Y= Bo+B1(X)
+
+d- All the unknown parameters (including the model in b) is sigma^2, Bo, and B1. Bo and B1 could be any number, negative or positive (but some values are more likely than others) while sigma^2 is only positive. 
+
+e- Since I am very unsure of Bo or B1, I would have their sigma values/variance be relatively high- my estimate for Bo would be roughly .5, with B1 being roughly .25. Meanwhile I have absolutely no idea of sigma but I would expect it to have a high spread- if I want it to cover 2 standard deviation 
+
+
+Exercise 9.6
+
+a- X= today's high temp; Y= tomorrow's high temp
+
+b- Y= N(u, sigma^2)
+
+c- Y= Bo+B1(X)
+
+d- All the unknown parameters are sigma^2, Bo, and B1. Bo and B1 could be any number, negative or positive (but some values are more likely than others) while sigma^2 is only positive.
+
+e- Since the relationship between Bo and B1 seems to be relatively strong, I would estimate that the sigma value would be smaller, and similarly I think the sigma for Bo and B1 would be low. Bo I would estimate to be about 0, since if the day before's high temp was 0 I would estimate the next day would be around 0. I would estimate B1 to be about 1, since I expect it to be very close to a 1:1 relationship.
+
+
+Exercise 9.7
+
+a- False
+
+b- True
+
+
+Exercise 9.8
+
+a- 
+bunnies_model <- stan_glm(height ~ age, data = bunnies,
+                       family = gaussian,
+                       prior_intercept = normal(10, 5), 
+                       prior = normal(0, 2.5), 
+                       prior_aux = exponential(0.0008),
+                       chains = 4, iter = 5000*2, seed = 84735)
+b- 
+songs_model <- stan_glm(clicks ~ snaps, data = songs,
+                       family = gaussian,
+                       prior_intercept = normal(0, 2.5), 
+                       prior = normal(0, 2.5), 
+                       prior_aux = exponential(0.0008),
+                       chains = 4, iter = 5000*2, seed = 84735)
+
+c-
+dogs_model <- stan_glm(happiness ~ age, data = dogs,
+                       family = gaussian,
+                       prior_intercept = normal(0, 2.5), 
+                       prior = normal(0, 2.5), 
+                       prior_aux = exponential(0.0008),
+                       chains = 4, iter = 5000*2, seed = 84735)
+
+
+Exercise 9.9
+
+a- 
+Y|Bo, B1 and sigma ~ N(u, sigma^2); u=Bo+B1(X)
+Bo ~ N(5000, 2000^2)
+B1 ~ N(-10, 5^2)
+sigma^2 ~ Exponential(.0005)
+
+b- Now we can simulate the normal regression prior model:
+```{r}
+bikes_model <- stan_glm(rides ~ humidity, data = bikes,
+                       family = gaussian,
+                       prior_intercept = normal(5000, 2000), 
+                       prior = normal(-10, 5), 
+                       prior_aux = exponential(0.0005),
+                       chains = 5, iter = 8000, seed = 84735,
+                       prior_PD = TRUE)
+
+```
+
+c-
+```{r}
+# 100 simulated model lines
+bikes |> 
+  add_fitted_draws(bikes_model, n = 100) |> 
+  ggplot(aes(x = humidity, y = rides)) +
+    geom_line(aes(y = .value, group = .draw), alpha = 0.15) + 
+    geom_point(data = bikes, size = 0.05)
+```
+
+Now we can plot the 4 datasets:
+```{r}
+# Simulate four sets of data
+set.seed(1234)
+bikes |> 
+  add_predicted_draws(bikes_model, n = 4) %>%
+  ggplot(aes(x = humidity, y = rides)) +
+    geom_point(aes(y = .prediction, group = .draw), size = 0.2) + 
+    facet_wrap(~ .draw)
+```
+
+d- The prior understanding is that as humidity increases, ridership decreases- however, this is a very weak relationship with a high standard deviation (particularly in plots 1 and 3).
+
+
+Exercise 9.10
+
+a- Below is the plot of ridership v humidity in the data:
+```{r}
+ggplot(bikes, aes(x = humidity, y = rides)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+In the bikes data, there appears to be a very slight negative relationship between humidity and rides.
+
+b- I would say no, since the variability is so high that a majority of the points would not fall under the 2 standard deviations from the mean.
+
+
+Exercise 9.11
+
+a- Here we will use the update shortcut to simulate the Normal regression posterior model:
+```{r}
+bikes_model_posterior <- update(bikes_model, prior_PD = FALSE)
+```
+
+b- Below are some MCMC diagnostics:
+```{r}
+neff_ratio(bikes_model_posterior)
+rhat(bikes_model_posterior)
+mcmc_trace(bikes_model_posterior, size = .1)
+mcmc_dens_overlay(bikes_model_posterior)
+```
+
+The diagnostics seem pretty good- the neff ratio is under 1, but only slightly so that should be fine. Otherwise the other diagnostics all look good!
+
+c- 
+```{r}
+# 100 simulated model lines
+bikes |> 
+  add_fitted_draws(bikes_model_posterior, n = 100) |> 
+  ggplot(aes(x = humidity, y = rides)) +
+    geom_line(aes(y = .value, group = .draw), alpha = 0.15) + 
+    geom_point(data = bikes, size = 0.05)
+```
+
+The posterior model shows stronger evidence for a negative relationship between the two variables (albeit still a weak one, with some of the lines being nearly flat)- compared to the prior model, this is a lot more cohesive (especially for the intercept, as the prior models lines were all over the place on the y axis).
+
+
+Exercise 9.12
+
+a- 
+```{r}
+tidy(bikes_model_posterior, effects = c("fixed", "aux"),
+     conf.int = TRUE, conf.level = .95)
+```
+
+b- The posterior median value of the sigma parameter is 1573.8, which means that the posterior SD is roughly 1572 rides.
+
+c- The 95% posterior credible interval for the humidity coefficient is -15.1 to -1.8, which means that 95% of the values in the distribution for this coefficient are within that range, suggesting that it is very likely that for each increase in units of humidity, the ridership on average will fall somewhere between 15.1 and 1.8.
+
+d- Yes we do; since 0 and/or any positive values are not within the CI for the B1 value (humidity coefficient), it is highly likely that there is a negative association between ridership and humidity.
+
+
+Exercise 9.13
+
+a- First we will simulate the posterior model for the typical number of riders on 90% humidity days:
+```{r}
+bikes_model_df <- as.data.frame(bikes_model_posterior)
+first_set <- head(bikes_model_df, 1)
+first_set
+```
+
+```{r}
+mu <- first_set$`(Intercept)` + first_set$humidity * 90
+mu
+```
+
+The typical number of riders on a 90% humidity day is 3073, but we now have to account for variability here:
+```{r}
+set.seed(12345)
+y_new <- rnorm(1, mean = mu, sd = first_set$sigma)
+y_new
+```
+Now we can create the model for both the typical ridership and for ridership tomorrow:
+```{r}
+set.seed(12345)
+predict_90 <- bikes_model_df |> 
+  mutate(mu = `(Intercept)` + humidity * 90,
+         y_new = rnorm(20000, mean = mu, sd = sigma))
+head(predict_90, 3)
+```
+
+The mu column here approximates the posterior model for typical ridership on 90% humidity days, and the y_new column approximates the posterior model for ridership tomorrow (an individual 90% humidity day).
+
+b- 
+```{r}
+# Plot the posterior model of the typical ridership on 90% humidity days
+ggplot(predict_90, aes(x = mu)) + 
+  geom_density()
+
+# Plot the posterior predictive model of tomorrow's ridership
+ggplot(predict_90, aes(x = y_new)) + 
+  geom_density()
+```
+
+While the actual shape of both of the curves is similar, the spread of the predictive model for tomorrow's ridership is much larger (and also has a higher middle/peak value).
+
+c- 80% CI:
+```{r}
+# Construct 80% posterior credible intervals
+predict_90 %>% 
+  summarize(lower_mu = quantile(mu, 0.1),
+            upper_mu = quantile(mu, 0.9),
+            lower_new = quantile(y_new, 0.1),
+            upper_new = quantile(y_new, 0.9))
+```
+
+The 80% posterior prediction interval for the number of riders tomorrow is between 1237 and 5289.
+
+d- We can closely follow the steps from the book here to use posterior_predict to confirm our earlier results:
+```{r}
+# Simulate a set of predictions
+set.seed(84735)
+shortcut_prediction <- 
+  posterior_predict(bikes_model_posterior, newdata = data.frame(humidity = 90))
+posterior_interval(shortcut_prediction, prob = .8)
+mcmc_dens(shortcut_prediction) +
+  xlab("predicted ridership on a 90% humidity day")
+```
+
+The plot looks very similar, and the interval values are also similar but slightly adjusted (I am unsure as to why since it is still using the same data values and simulations).
+
+
+Exercise 9.14
+
+a- I would guess that there is a negative relationship between ridership and wind speeds (when wind speeds are higher, less riders would be out)
+
+b- Below is the specification of the model in parts:
+
+Y|Bo, B1, sigma ~ N(u, sigma^2) and u=Bo + B1(X)
+
+Bo ~ N(5000, 1000) Since I am unsure of the value here, I am giving a large variability of 1000, and 5000 seems to be an acceptable estimate for average bike ridership when winds are average/at 0.
+
+B1 ~ N(-200, 20) I'll estimate here that for each increase in mph for wind speed, about 200 less people will ride their bikes (and give it an SD of about 20).
+
+sigma ~ Exponential(.01) I'm expecting a strong relationship here, so I can give it an SD of about 100 (.01 in exponential terms)
+
+
+c- Below is the simulated prior:
+```{r}
+bikes_model2 <- stan_glm(rides ~ windspeed, data = bikes,
+                       family = gaussian,
+                       prior_intercept = normal(5000, 1000),
+                       prior = normal(-200, 20), 
+                       prior_aux = exponential(0.01),
+                       chains = 4, iter = 8000, seed = 12345, prior_PD=TRUE)
+```
+
+Below are the simulated datasets:
+```{r}
+bikes |> 
+  add_fitted_draws(bikes_model2, n = 100) |> 
+  ggplot(aes(x = windspeed, y = rides)) +
+  geom_line(aes(y = .value, group = .draw), alpha = .15) +
+  geom_point(data = bikes, size = .05)
+```
+
+Here we can see a definite strong negative relationship between the two variables, but with a high variability (particularly regarding the intercept).
+
+d- Below is the plot of rides v windspeed:
+```{r}
+ggplot(bikes, aes(x = windspeed, y = rides)) +
+  geom_point(size = .5) +
+  geom_smooth(method = "lm")
+```
+
+Here it looks like the relationship, while still negative, is moderate as opposed to very strong like in the prior. 
+
+
+Exercise 9.15
+
+First we can simulate the posterior via the update shortcut:
+```{r}
+bikes_model2_posterior <- update(bikes_model2, prior_PD = FALSE)
+```
+
+Density plot:
+```{r}
+mcmc_dens_overlay(bikes_model2_posterior)
+```
+
+Now we can plot this against the data:
+```{r}
+bikes |> 
+  add_fitted_draws(bikes_model2_posterior, n = 100) |> 
+  ggplot(aes(x = windspeed, y = rides)) +
+  geom_line(aes(y = .value, group = .draw), alpha = .15) +
+  geom_point(data = bikes, size = .05)
+```
+
+The posterior continues to show a strong negative relationship (between the moderate one of the real data and the very strong one of the prior).
+
+
+Exercise 9.16
+
+a- Below is the simulation of the normal regression prior (since the problem said to use weakly informative priors, we don't need to specify them for this outside of the intercept since R will add in weakly informative priors automatically):
+```{r}
+penguins_model <- stan_glm(flipper_length_mm ~ bill_length_mm, data = penguins_bayes,
+                       family = gaussian,
+                       prior_intercept = normal(200, 25),
+                       chains = 4, iter = 10000, seed = 12345, prior_PD=TRUE)
+```
+
+b-
+```{r}
+prior_summary(penguins_model)
+```
+
+Given these values, below is the prior model defined:
+Y|Bo, B1, sigma ~ N(u, sigma^2) and u = Bo + B1(X)
+Bo ~ N(200, 25^2)
+B1 ~ N(0, 6.4^2)
+sigma ~ Exponential(.071)
+
+c- Below are the 100 prior plausible model lines (it looks as though I forgot to remove the NAs earlier but I believe the model should remove them for me! I will need to remove them here however):
+```{r}
+penguins_bayes |> filter(is.na(bill_length_mm) == FALSE & is.na(flipper_length_mm) == FALSE) |> 
+  add_fitted_draws(penguins_model, n = 100) |> 
+  ggplot(aes(x = bill_length_mm, y = flipper_length_mm)) +
+  geom_line(aes(y = .value, group = .draw), alpha = .15)
+```
+
+Oh boy, this is messy! Looks like there may be no relation here in the prior- let's try the 4 prior simulated datasets:
+```{r}
+set.seed(12345)
+penguins_bayes |> 
+  filter(is.na(bill_length_mm)==FALSE & is.na(flipper_length_mm)==FALSE ) |> 
+  add_predicted_draws(penguins_model, n = 4) |> 
+  ggplot(aes(x = bill_length_mm, y = flipper_length_mm)) +
+    geom_point(aes(y = .prediction, group = .draw)) + 
+    facet_wrap(~ .draw)
+```
+
+d- Overall, our prior understanding is very weak and seems to show a lot of uncertainty around the relationship (both positive and negative relationships are plausible).
+
+
+Exercise 9.17
+
+a- Below is the plot of the relationship in the data:
+```{r}
+penguins_bayes |> 
+  ggplot(aes(bill_length_mm, flipper_length_mm)) +
+  geom_point() +
+  geom_smooth(method = lm)
+```
+
+Here in the data there appears to be a strong positive relationship between bill and flipper length!
+
+b- I believe a normal regression would work here, as the relationship is linear and the variance does not seem to be out of the ordinary.
+
+
+Exercise 9.18
+
+a- Here we can update our model to simulate the posterior:
+```{r}
+set.seed(12345)
+penguins_model_posterior <- update(penguins_model, prior_PD = FALSE)
+```
+
+b- Below are 100 posterior model lines (removing NAs here):
+```{r}
+penguins_bayes |>  
+  filter(is.na(bill_length_mm)==FALSE & is.na(flipper_length_mm)==FALSE ) |> 
+  add_fitted_draws(penguins_model_posterior, n = 100) |> 
+  ggplot(aes(x = bill_length_mm, y = flipper_length_mm )) +
+    geom_line(aes(y = .value, group = .draw), alpha = 0.15)
+```
+
+The posterior seems pretty stable here and shows a strong relationship!
+
+c- Here is the tidy summary with 90% CI:
+```{r}
+tidy(penguins_model_posterior, effects = c("fixed", "aux"),
+     conf.int = TRUE, conf.level = 0.90)
+```
+
+d- The 90% CI for the bill length coefficient is between 1.52 and 1.86. This indicates that, on average, the increase in MM for flipper length for every 1 MM increase in bill length is between 1.52 and 1.86.
+
+e- Yes we do; since 0 and negative values were not included in the CI, we can safely say that there is evidence that penguins with longer bills tend to have longer flippers.
+
+
+Exercise 9.19
+
+a- First we have to turn the model into a data frame:
+```{r}
+penguins_model_df <- as.data.frame(penguins_model_posterior)
+first_set <- head(penguins_model_df, 1)
+first_set
+```
+Now that we have these values, we will calculate mu, and create our simulation:
+```{r}
+mu <- first_set$`(Intercept)` + first_set$bill_length_mm*51
+set.seed(12345)
+y_new <- rnorm(1, mean = mu, sd = first_set$sigma)
+predict_51 <- penguins_model_df |> 
+  mutate(mu = `(Intercept)` + bill_length_mm*51,
+         y_new = rnorm(20000, mean = mu, sd = sigma))
+head(predict_51, 4)
+```
+
+The mu column shows the model for typical flipper length for a penguin with bill length of 51 mm, while the y_new column shows the model for Pablo (the individual penguin with bill length of 51 mm).
+
+b- Below are the two density plots:
+```{r}
+#mu plot
+ggplot(predict_51, aes(x = mu)) + 
+  geom_density()
+#y_new plot
+ggplot(predict_51, aes(x = y_new)) +
+  geom_density()
+```
+
+Similar to the last time we plotted the individual v average posterior plots, the spread for the individual (Pablo) is much larger than that of the average/overall.
+
+c- 80% posterior prediction interval for Pablo flipper length:
+```{r}
+predict_51 |> summarize(lower_new = quantile(y_new, .1),
+                        upper_new = quantile(y_new,.9))
+```
+
+The CI here is from 199.2 to 266.6
+
+d- The 80% credible interval for typical flipper length for penguins with 51mm bills would be much narrower- with individual posteriors, we have to add a large amount of variability, however when it is an average of a group then a lot of the variability is already taken care of.
+
+e- Using posterior_predict to confirm earlier results:
+```{r}
+#first we will recreate the density plots
+set.seed(12345)
+shortcut_prediction <- posterior_predict(penguins_model_posterior, newdata = data.frame(bill_length_mm = 51))
+mcmc_dens(shortcut_prediction)
+```
+
+The density plot here is very similar to the one we made in part b (for Pablo the penguin). Now we will recreate the CI:
+```{r}
+posterior_interval(shortcut_prediction, prob = .8)
+```
+
+These values are very similar to the CI we created earlier!
+
+
+Exercise 9.20
+
+a- Their prior understanding is that, for every increase of 1 gram in a penguin, the average flipper length will increase by .01 mm, but it could be between .006 and .014.
+
+b- Below is the plot of flipper length and body mass:
+```{r}
+ggplot(penguins_bayes, aes(x = body_mass_g, y = flipper_length_mm)) + 
+  geom_point(size = 0.5) + 
+  geom_smooth(method = "lm")
+```
+Among the sampled penguins, there does appear to be a very strong positive relationship between body mass and flipper length.
+
+c- I am pretty unsure, but I would guess that the sigma parameter is bigger when X=body mass, because even though the relationship appears to be stronger, the data points are a bit more scattered on this plot than the one we did earlier comparing bill length and flipper length.
+
+d- Model:
+```{r}
+penguins_model_2 <- stan_glm(flipper_length_mm ~ body_mass_g, data=penguins_bayes, 
+  family=gaussian,
+  prior = normal (.01,.002), 
+  chains = 4, iter = 10000, seed=12345)
+```
+
+
+e- Below is the plot for the posterior model of the B1 coefficient:
+```{r}
+mcmc_dens_overlay(penguins_model_2, pars=c("body_mass_g"))
+```
+
+
+Compared to the prior, the posterior has higher values so the relationship is stronger than the researchers originally expected.
