@@ -1,0 +1,450 @@
+---
+title: "Wellons_HW11"
+author: "Madelynn Wellons"
+date: "11/2/2021"
+output: html_document
+---
+
+```{r}
+library(bayesrules)
+library(tidyverse)
+library(bayesplot)
+library(rstanarm)
+```
+
+Exercise 10.1
+
+The big three questions to ask are "how fair is the model", "how wrong is the model", and "how accurate are the posterior predictive models"?
+
+
+Exercise 10.2
+
+a- This model could be on subway wait times in NYC, but the way it was collected could be poor because they only collected data from subways running from 12pm-5pm and no other hours.
+
+b- This model could be on the average health of people who order McDonalds, but could be collected by McDonalds in order to show that healthy people eat there.
+
+c- This model could be on how fast above the speed limit one can go before getting pulled over, and people may utilize it to go faster than they should in a dangerous area.
+
+d- This model could be on levels of police brutality in certain cities, but a person whose father is a cop (and is very pro-cop) is analyzing the data and chooses to suppress data points he considers outliers or chooses (out of the plausible models) a model that shows less police brutality overall.
+
+
+Exercise 10.3
+
+a- I am a woman and I am from the northeast
+
+b- I may only view my future analyses through my own personal experiences, thereby limiting how my analyses impact the broader population
+
+c- This may benefit my evaluation of future analyses because I could see ways that a model may be missing people who have my lived experience
+
+
+Exercise 10.4
+
+a- I would tell them that, depending on what the the data he is observing is, he is likely not a neutral observer, and if he is observing people or anything alive he may be actually impacting the results just via observation.
+
+b- I would tell that them if the observed data is not neutral, then it is impossible for a model to be neutral.
+
+c- My senior honors thesis was about breakups, and in choosing the sample I intentionally chose to overrepresent LGBTQ+ individuals because my experience with an ex-girlfriend informed my knowledge that post-breakup networks may be different between LGBTQ+ and straight couples.
+
+
+Exercise 10.5
+
+All models are wrong because it is impossible to fully capture/predict data even if you have perfect data and a perfectly fair model, but some can be close enough that the predictions can be useful for society.
+
+
+Exercise 10.6
+
+The three assumptions of the NOrmal Bayesian linear regression model are:
+
+1. Conditioned on X, the observed data Yi on case i is independent of the observed data on any other case j
+
+2. The typical Y outcome can be written as a linear function of X, u= Bo + B1X
+
+3. At any X value, Y varies normally around u with consistent variability sigma
+
+
+Exercise 10.7
+
+a- I would use the Bo B1 and sigma values (obtained via the simulated parameters) to plug in the X values to obtain the predicted Y1 value (the Bo and B1 to find the mu, and the sigma as the sigma for the model)
+
+b- The equation would be as follows:
+```{r}
+#Y= -1.8 + 2.1*x
+c <- c(12, 10, 4, 8, 6)
+y <- -1.8 + 2.1*c
+y
+```
+For each value, these are now the mu for each distribution of y, with the standard deviation remaining at .8. Below are the models for each:
+
+y1~ N(23.4, .8^2)
+
+y2~ N(19.2, .8^2)
+
+y3~ N(6.6, .8^2)
+
+y4~ N(15, .8^2)
+
+y5~ N(10.8, .8^2)
+
+The mean of each of the normal distributions is somewhat close to each of the y values that the problem gave us, and when you account for the SD they all likely fall on the curves of the models that we have provided.
+
+
+Exercise 10.8
+
+a- The goal of a posterior predictive check is to anticipate what we will observe, to ensure that our regression model is not too far off (to make sure we did not make a major error).
+
+b- It depends on which values of the posterior predictive check you are trying to interpret (summary, the plot, intervals, etc.) but overall for each of these you are looking for your regression model to fall within the intervals, plot, etc. values (or at the very least to not be too far from them).
+
+
+Exercise 10.9
+
+a- The median absolute error will tell us the typical difference (amount of "error in the model") between the observed value and the mean of what we predicted for that value (Yi')
+
+b- The scaled median absolute error is the typical/average number of SD's that the observed data is from the predicted mean for that value; this could be better than the MAE because it is showing us this in terms of the numbers of SD in the model, which essentially puts it in context (or "scale") 
+
+c- The within-50 statistic tells us how much of the observed values fall within the 50% interval that our model provides (usually the middle 50%, but as we discovered in other chapters sometimes we will do it at the highest frequency levels, etc.)
+
+
+Exercise 10.10
+
+a- The darker density represents the observed data, and a single line of the lighter density is one prediction of our model (e.g. one chain from an MCMC model)
+
+b- A good fitting model will have both the darker density line and a majority of the lighter density lines overlapping, because that means that our model is fitting with the observed data.
+
+c- If our model is poorly fitting, we would have little overlap with the darker density line at multiple major points 
+
+
+Exercise 10.11
+
+a- The data here is how much Reem enjoys this specific recipe
+
+b- The model is how much Reem enjoys different types of recipes (potentially measured by the amount of anchovies in each recipe)
+
+c- You could use cross-validation here to take some of your past recipes to create a model and see if that model predicted her level of enjoyment of another portion of your past recipes, and then if that seems correct you can input your new recipe (the level of anchovies in it etc.) to evaluate how likely she is to enjoy it
+
+d- This would help you develop a successful recipe because it gives you a more valid (tested on previous data) model for how much she will enjoy the recipe based on anchovy levels.
+
+
+Exercise 10.12
+
+a- The four steps are to create folds, train and test the model, repeat, and calculate cross-validation estimates
+
+b- If you use the same data for training and testing, then the model will perfectly predict the values in the testing phase since it has used those values to train, so it could inaccurately assume that the model is perfectly able to predict new values
+
+c- I think my only question is how to decide how many folds to use for this cross-validation; the book gave a good explanation on how it varies per dataset, and gave a basic "Goldilocks method", but I feel like that is still a bit too vague for me to really know how many folds I should be using. 
+
+
+Exercise 10.13
+
+```{r}
+library(bayesrules)
+data("coffee_ratings")
+coffee_ratings <- coffee_ratings %>% 
+  select(farm_name, total_cup_points, aroma, aftertaste)
+```
+
+a- Let's first check out the "head" of the dataset:
+```{r}
+head(coffee_ratings)
+```
+
+It appears that aroma, aftertaste, and total_cup_points are all correlated based on this chart, and are likely not independent of one another.
+
+b- We will now run the code mentioned in the problem:
+```{r}
+set.seed(84735)
+new_coffee <- coffee_ratings %>% 
+  group_by(farm_name) %>% 
+  sample_n(1) %>% 
+  ungroup()
+dim(new_coffee)
+```
+
+
+Exercise 10.14
+
+a- Below is the plot for rating v aroma:
+```{r}
+ggplot(new_coffee, aes(y = total_cup_points, x = aroma)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+It appears that they have a positive relationship- there are clearly some outliers, but the SE is very very small so I would expect this to be a relatively strong relationship.
+
+b- Simulating the normal regression posterior:
+```{r}
+coffee_model <- stan_glm(total_cup_points ~ aroma, data = new_coffee,
+                         family = gaussian,
+                         prior_intercept = normal(75, 10),
+                         chains = 4, iter = 10000, seed = 12345)
+```
+
+
+c- First, here is the density plot of B1:
+```{r}
+mcmc_dens_overlay(coffee_model)
+```
+
+In the middle is the density plot for aroma (the B1 coefficient).
+
+Now here are some summary statistics on the B1 coefficient:
+```{r}
+df_coffee_model <- as_tibble(coffee_model) #got an error when I did not use the as_tibble function so I added that here
+df_coffee_model |> summarize(quantile(aroma, .025), quantile(aroma, .975), median=quantile(aroma, .5), sd=sd(aroma)) #use aroma here to make sure we are getting the quantiles/median/sd of B1)
+```
+
+d- The posterior median of B1 is 6.16 (calculated in the earlier problem), which means that since this is a normal model, on average for every 1 point increase in aroma will lead to a 6.16 point increase in total cup points.
+
+e- Yes, we do- in the summary table in part c, I also calculated the quintiles of the 95% interval for the B1 coefficient and all of them were above 0 by a significant amount, meaning that there is significant evidence that the B1 coefficient is positive (and therefore, the better a coffee bean's aroma, the higher its rating will tend to be).
+
+
+Exercise 10.15
+
+a- Below is the code for simulating a sample from the first posterior parameter set:
+```{r}
+first_set <- head(df_coffee_model, 1)
+first_set
+
+beta_0 <- first_set$`(Intercept)`
+beta_1 <- first_set$aroma
+sigma <- first_set$sigma
+set.seed(12345)
+one_simulation <- new_coffee |> 
+  mutate(mu = beta_0 + beta_1 * aroma,
+         simulated_points = rnorm(572, mean = mu, sd = sigma)) |> 
+  select(aroma, total_cup_points, simulated_points)
+```
+
+b- Below is a density plot of the simulated sample on the actual data:
+```{r}
+ggplot(one_simulation, aes(x = simulated_points)) +
+  geom_density(color = "lightblue") +
+  geom_density(aes(x = total_cup_points), color = "darkblue")
+```
+
+There is still significant overlap here- if anything, the simulated points give a wider spread, while the data is a bit more exact (has a higher density at the peak, etc.)
+
+c- Below is the pp_check:
+```{r}
+pp_check(coffee_model) +
+  xlab("total_cup_points")
+```
+
+This shows that a majority of my 20,000 simulated samples/chains were in line with one another relative to the data.
+
+d- Assumption 2 seems to be reasonable here- we have a normal distribution (even with some outliers on the actual data) and the typical Y outcome should be able to be written out via the linear function as shown earlier and here as well with how much the chains overlap showing that the linear function parameter predictors were all relatively coheret. However when it comes to assumption 3, we may have violated it/it may not be reasonable for this model- as you can see in the plot above, there is significant variability among the chains at the peak of the model, and less at lower points, which may shown that sigma may be inconsistent at different points away from mu.
+
+
+Exercise 10.16
+
+a- Simulated posterior predictive model:
+```{r}
+#using the same beta/sigma as earlier
+set.seed(12345)
+predict_16 <- df_coffee_model |> 
+  mutate(mu = `(Intercept)` + aroma*7.67,
+         y_new = rnorm(20000, mean = mu, sd = sigma))
+```
+
+Plotting:
+```{r}
+ggplot(predict_16, aes(x = y_new)) +
+  geom_density()
+```
+
+b- 
+```{r}
+predict_16 |> 
+  summarize(sd = sd(y_new), error = 84-mean(y_new),
+            error_scaled = error/sd(y_new))
+```
+
+Here we can see that the raw error is about 1.34, while the scaled error is about .688
+
+c- Below is the ppc_intervals plot:
+```{r}
+#applying posterior predict to whole model first
+set.seed(12345)
+predictions <- posterior_predict(coffee_model, newdata = new_coffee)
+
+#plot
+ppc_intervals(new_coffee$total_cup_points, yrep=predictions, x=new_coffee$aroma, 
+              prob = .5, prob_outer = .95)
+```
+
+This plot shows that overall, this is fairly accurate (there are some outliers, mostly those with lower total cup points, but overall a majority of the data is falling within those 95% prediction interval lines).
+
+d- We can get this via the prediction_summary function:
+```{r}
+set.seed(12345)
+prediction_summary(coffee_model, data = new_coffee)
+```
+
+We can see here that about 69% of the datapoints are within the 50% interval.
+
+
+Exercise 10.17
+
+a- We will use prediction_summary_cv here:
+```{r}
+set.seed(12345)
+cv_procedure <- prediction_summary_cv(model = coffee_model, data = new_coffee, k =10)
+cv_procedure$folds
+```
+
+b- We will use the above chart to see the spread of these metrics within each of the folds, and will use the below chart to see the average:
+```{r}
+cv_procedure$cv
+```
+
+The MAE is about .874, while the scaled MAE is about .44, meaning that the typical difference between the data and predicted data is about .874 while putting this on the scale of SD (typical number of SD the data is from the predicted data) reduces it to about .44, which is pretty good overall- the spread of these values across the folds seems fairly even (only one MAE going above 1, and even then only by a bit). The within_50 is about 68.7 and the within_95 is about 96%, meaning that about 68.7% of the data points fall within 50% of their predicted interval and 96% of the data points fall wihin 95% of their predicted interval. This spread is also even across the 10 folds.
+
+c- To validate, we can compare these values against the whole dataset:
+```{r}
+set.seed(12345)
+prediction_summary(coffee_model, data = new_coffee)
+```
+
+Yes, these values are all similar to the ones we got when we did this via the folds.
+
+
+Exercise 10.18
+
+We can answer the 4 prongs of this question:
+
+1- How was the data collected?- We do not know how it was collected
+
+2- By whom and for what purpose was the data collected?- We don't know about the collection, but we do know that James LeDoux PROCESSED and distributed the data through an R for Data Science project, which does not appear to have any bias regarding the data as this was processed in a way to show how R can be used. 
+
+3- How might the results of the analysis, or the data collection itself, impact individuals and society?- The analysis may impact society/individuals to put higher emphasis on some of the factors we have shown to be statistically related to the overall "point score" of a cup of coffee (e.g. aroma), which since this has not been proven to have a causal element could lead to error in individual's coffee judgements. 
+
+4- What biases might be baked into this analysis?- Since this only included a certain number of farms, this may be biased to certain regions that the farms are a part of.
+
+Overall I would say that the model is somewhat fair, but the biggest potential source of bias could be regional, and our lack of knowledge regarding the collection of the data makes it difficult to decide for sure that this is a fair model.
+
+
+Exercise 10.19
+
+a- Below is the simulated model:
+```{r}
+coffee_model2 <- stan_glm(total_cup_points ~ aftertaste, data = new_coffee,
+                          family = gaussian,
+                          prior_intercept = normal(75, 10),
+                          chains = 4, iter = 10000, seed = 12345)
+```
+
+
+b- Plot is below:
+```{r}
+pp_check(coffee_model2, nreps = 50)
+```
+
+This plot shows that, similar to the last one, the model appears to predict fairly well- however there is still a larger amount of variance at the peak of the distribution, along with some outliers on the data.
+
+c- 10 fold CV posterior prediction:
+```{r}
+set.seed(12345)
+cv_procedure2 <- prediction_summary_cv(model = coffee_model2, data = new_coffee, k = 10)
+cv_procedure2$folds
+cv_procedure2$cv
+```
+
+d- Given that the MAE and scaled MAE is smaller for the aftertaste (and there seems to be a tiny bit more overlap in the earlier plot), I would say that I would pick aftertaste as the one predictor of coffee bean ratings.
+
+
+Exercise 10.20
+
+a- I will use the weakly informative priors that R provides; below is the stan_glm model:
+```{r}
+weather_model <- stan_glm(maxtemp ~ mintemp, data = weather_perth,
+                          family = gaussian,
+                          chains = 4, iter = 10000, seed= 12345)
+```
+
+
+b- We can do something similar to what we did in an earlier problem (turn into a data frame, plot, and provide summary statistics):
+```{r}
+df_weather_model <- as_tibble(weather_model)
+df_weather_model |> 
+  ggplot(aes(mintemp)) +
+  geom_density()
+```
+```{r}
+#summary statistics
+df_weather_model |> summarize(quantile(mintemp, .025), quantile(mintemp, .975), quantile(mintemp, .5), sd(mintemp))
+```
+
+Based on the plot and the summary statistics, it appears that on average, for every degree increase in minimum tempature, the max temperature increases by about .836 degrees; the standard deviation here is also relatively small (only .027). 
+
+c- Similarly to earlier problems, we can use a few methods to evaluate the model- here I'll use the pp_check plot, along with the ppc_intervals plot and the prediction summary statistics to tell us the within 50 and 95% on a numeric scale (since it can be hard to determine on the plot).
+```{r}
+pp_check(weather_model, nreps = 50)
+```
+
+This already is telling me that the model is not accurate- the peak is much more to the left, with a strange "bump" part of the way down (potentially due to the seasons in Australia, since they are more wet v dry seasons as opposed to winter v summer). We can continue with our analysis though to see if we can quantify the issue in terms of within % predictive intervals.
+```{r}
+#ppc interval plot
+set.seed(12345)
+predictions2 <- posterior_predict(weather_model, newdata = weather_perth)
+ppc_intervals(weather_perth$maxtemp, yrep = predictions2, x = weather_perth$mintemp,
+              prob = .5, prob_outer = .95)
+```
+
+As expected, it looks like the data on the ends of the distribution are fitting in better than those in the middle (where the peak of the distribution is). Let's get the quantitative values for the within %s:
+```{r}
+#prediction summary stats
+set.seed(12345)
+prediction_summary(weather_model, data = weather_perth)
+```
+
+Here we can see large amounts of error, and interestingly a large portion does fit within the 95% interval- however, less than half of the data fits within the 50% predicted interval. Therefore I would say that this is not a good model- it could be like what Steve showed us in class this week where there are two distributions mixed together (potentially two seasonal distributions?), or that a normal distribution would not work here, etc.
+
+
+Exercise 10.21
+
+a- Here I will once again use the weakly informative priors, below is the model:
+```{r}
+bikes_model <- stan_glm(rides ~ humidity, data = bikes,
+                        family = gaussian,
+                        chains = 4, iter = 10000, seed = 12345)
+```
+
+
+b- We can do the same thing as the last problem- plot and use summary statistics:
+```{r}
+df_bikes_model <- as_tibble(bikes_model)
+df_bikes_model |> 
+  ggplot(aes(humidity)) +
+  geom_density()
+```
+
+Already here I'm noticing that, although it appears to have a negative relationship, there is significant overlap with 0 and positive numbers on the right tail of the distribution, so this relationship may not be strong or definite.
+```{r}
+#summary statistics
+df_bikes_model |> summarize(quantile(humidity, .025), quantile(humidity, .975), quantile(humidity, .5), sd(humidity))
+```
+
+My thoughts earlier are confirmed here- with the overlap into the positive, it is difficult to determine if this is truly a negative relationship or not. However, given the larger SD (4.62) I would guess that this is a negative relationship still, but with wide variance/a weak relationship.
+
+c- We can once again perform the same actions as the last problem (pp_check, ppc_intervals, and prediction summary):
+```{r}
+pp_check(weather_model, nreps = 50)
+```
+
+This reveals a similar pattern to the last problem, where it is almost bi-modal/has a second smaller peak, and appears to be like the 2 distribution example Steve showed us in class. We'll continue with our analysis however:
+```{r}
+set.seed(12345)
+predictions3 <- posterior_predict(bikes_model, newdata = bikes)
+ppc_intervals(bikes$rides, yrep = predictions3, x = bikes$humidity, prob = .5, prob_outer = .95)
+```
+
+Similar to the last one again, it appears to be data in the center that is outside of the prediction- in addition, you can really see here how large the SD is which adds even more doubt onto the model.
+```{r}
+#prediction summary stats
+set.seed(12345)
+prediction_summary(bikes_model, data = bikes)
+```
+
+Similarly to the last problem, the MAE is very big (the scale mae is not as terrible, but still pretty decent), and the within 50 interval is very small even though the within 95 covers a majority of the points. I would again argue that this is not a good model, and is likely 2 distributions.
+
+
