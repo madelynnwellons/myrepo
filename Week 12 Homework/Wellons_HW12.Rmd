@@ -1,0 +1,298 @@
+---
+title: "Wellons_HW12"
+author: "Madelynn Wellons"
+date: "11/10/2021"
+output: html_document
+---
+
+Loading packages
+```{r}
+library(bayesrules)
+library(rstanarm)
+library(bayesplot)
+library(tidyverse)
+library(broom.mixed)
+library(tidybayes)
+```
+
+Exercise 11.1
+
+We might want to build a regression model with more than one predictor in case just one predictor could not explain the full picture, or by using just the one picture would paint a misleading picture/would have a poor model (e.g. some models that have density plots with two modes, showing the two distributions of 2 different groups- the second predictor)
+
+
+Exercise 11.2
+
+a- There is no indicator for the Ford category because B0 (the intercept) accounts for the Ford category- when B1-3 are all 0, the value B0 will be the baseline, indicating the mpg for a Ford
+
+b- B2 is the change in mpg when the make of a car is a Subaru
+
+c- B0 is the mpg of a Ford (the "average" or "baseline" mpg)
+
+
+Exercise 11.3
+
+a- B0 is the weight of a "newborn" Mr. Stripey tomato (0 days old); B1 is the change in the tomato's weight in grams by each day it has been growing, and B2 is the chance in the tomato's weight in grams if it is a Roma tomato (as opposed to a Mr. Stripey tomato)
+
+b- If B2 were 0, that would mean the tomato is a Mr. Stripey type tomato
+
+
+Exercise 11.4
+
+a- For X1 and X2 to interact, it means that there is a relationship between type of tomato and daily weight gain of the tomato. For instance, Roma tomatoes may grow at a faster rate per day than Mr. Stripey tomatoes.
+
+b- B3 is the the change in the weight of the tomato in grams based on the relationship between daily weight gain and tomato type.
+
+
+Exercise 11.5
+
+```{r}
+knitr::include_graphics("/Users/madelynnwellons/Downloads/IMG_4150.JPG")
+```
+
+
+c- Two other ways are context and hypothesis tests
+
+
+Exercise 11.6
+
+a- It can be beneficial to add predictors to models because the new predictor may be able to account for more variance and explain the data better
+
+b- It can be beneficial to remove predictors from models if the model is "too noisy", or if predictors are essentially the same (e.g. if two predictors correlate heavily, the model would benefit from only one of them being present instead of both)
+
+c- I might add the child's gender, because at different ages girls and boys have their growth spurts, and boys in general have larger feet than girls after they have hit puberty
+
+d- I might remove the indicator of whether a child knows how to swim, because that does not have anything directly to do with shoe size
+
+
+Exercise 11.7
+
+a- Qualities of a good model include having a good balance of bias and variance (not too many or too few predictors), being a fair model, being "less wrong" (lower levels of error), and having accurate posterior predictions
+
+b- Qualities of a bad model include having too much bias or variance, not being a fair model, having high levels of error, and having inaccurate posterior predictions
+
+
+Exercise 11.8
+
+We can use visualizations to determine which model is better (e.g. plotting posterior predictions against data), cross-validation (the k-fold cross validation, where we train the model on portions of the data and test its' accuracy on the rest of the data and compare the accuracy of each model), and ELPD (expected log-predictive densities, which calculates the accuracy of the posterior predictions of the models- we can again compare these and the higher ELPD means that model is "better"/more accurate).
+
+
+Exercise 11.9
+
+The bias-variance trade-off is essentially the trade-off you get when you add or subtract predictors from a model; when you add predictors, you increase the variance and subtract bias, and vice versa when you subtract predictors. This is important because this a good balance of bias and variance can give you a "good" model, in that it is not overfit to your specific dataset but it is not so loose as to not be helpful in predictions.
+
+
+Exercise 11.10
+
+```{r}
+# Alternative penguin data
+penguin_data <- penguins_bayes %>% 
+  filter(species %in% c("Adelie", "Gentoo"))
+```
+
+a- First we can plot the penguin data (with the species as colors since they are categorical variables):
+```{r}
+ggplot(penguin_data, aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+It looks like the Gentoo species of penguins have both higher body mass and higher flipper length on average than the Adelie penguins. There is also a positive relationship between flipper length and body mass.
+
+b- Simulating the posterior normal regression model:
+```{r}
+penguin_data <- na.omit(penguin_data)
+penguins_model <- stan_glm(
+  body_mass_g ~ flipper_length_mm + species,
+  data = penguin_data, family = gaussian, 
+  prior_intercept = normal(4000, 250),
+  chains = 4, iter = 10000, seed = 12345)
+```
+
+
+c- Visually, we can do a pp check as well as another plot of the model (example "draws":
+```{r}
+pp_check(penguins_model)
+
+penguin_data <- na.omit(penguin_data)
+
+penguin_data |> 
+  add_fitted_draws(penguins_model, n = 100) |> 
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+    geom_line(aes(y = .value, group = paste(species, .draw)), alpha = .1) +
+    geom_point(data = penguin_data, size = 0.1)
+```
+
+In the first plot we can see that there is clearly something we are missing here (likely the interaction between species and another variable), as this is bimodal and appears to be like 2 distributions pushed together. In the second plot we see that the draws from the model are similar to those from the plot we made earlier in the problem using the data- the model is doing well in terms of acting like the data, but something here is not capturing the whole picture. 
+
+We can now numerically determine the 95% CI for each predictor coefficient:
+```{r}
+# Posterior summaries
+posterior_interval(penguins_model, prob = 0.8, 
+                   pars = c("flipper_length_mm", "speciesGentoo"))
+```
+
+The flipper length value here is not too wide, but the species CI is extremely large!
+
+d- Below is the tidy summary of the model:
+```{r}
+tidy(penguins_model, effects = c("fixed", "aux"),
+     conf.int = TRUE, conf.level = .8)
+```
+
+The flipper length coefficient here is 42.4, which means that on average, for every increase in 1 mm of flipper length, the penguins body mass will increase by 42.4 grams. The species coefficient here is 238, which means that on average, when a penguin is a Gentoo (as opposed to an Adelie), it weighs 238 grams more. 
+
+e- Below is the simulation of the posterior prediction and the plot:
+```{r}
+# Simulate a set of predictions
+set.seed(12345)
+Adelie197_prediction <- posterior_predict(
+  penguins_model,
+  newdata = data.frame(flipper_length_mm = 197, 
+                       species = "Adelie"))
+
+# Plot the posterior predictive model
+mcmc_areas(Adelie197_prediction) +
+  xlab("Adelie 197 mm weight")
+```
+
+For this specific penguin, the model has estimated that the weight is around 4000 g, with other most likely values ranging between 3750 and 4250.
+
+
+Exercise 11.11
+
+a- Simulating the posterior for this model:
+```{r}
+penguins_model2 <- stan_glm(
+  body_mass_g ~ flipper_length_mm + species + flipper_length_mm:species,
+  data = penguin_data, family = gaussian, 
+  prior_intercept = normal(4000, 250),
+  chains = 4, iter = 10000, seed = 12345)
+```
+
+b- Plots for the 50 posterior lines:
+```{r}
+penguin_data |> 
+  add_fitted_draws(penguins_model2, n = 50) |> 
+  ggplot(aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+    geom_line(aes(y = .value, group = paste(species, .draw)), alpha = .1)
+```
+
+This looks similar to the last plot we did to plot these few variables, which is a good sign; based on this plot knowing the context of the interaction term, I'm noticing that the Gentoo lines tend to have a steeper slope, indicating that tge Gentoo species may have a stronger relationships between flipper length and body mass.
+
+c- Below is the tidy summary for the model:
+```{r}
+tidy(penguins_model2, effects = c("fixed", "aux"),
+     conf.int = TRUE, conf.level = .8)
+```
+
+I believe that, while not strong evidence, this does provide some evidence that the interaction terms are necessary for the model. For example, the confidence interval for the interaction coefficient is consistently above 0 and has a low standard error. However, it is apparent that this has wreacked a bit of havoc on the species coefficient- the SE here is much higher than before, so potentially the interaction term is also picking up some excess "static" from the overall species coefficient. Overall though, given the plots we saw earlier I would still say that this is a necessary addition. 
+
+
+Exercise 11.12
+
+a- Simulating the posterior model:
+```{r}
+penguins_model3 <- stan_glm(
+  body_mass_g ~ flipper_length_mm + bill_length_mm + bill_depth_mm,
+  data = penguin_data, family = gaussian, 
+  prior_intercept = normal(4000, 250),
+  chains = 4, iter = 10000, seed = 12345)
+```
+
+b- Below are the credible intervals for the model parameters:
+```{r}
+posterior_interval(penguins_model3, prob = .8)
+```
+
+c- All of these appear to have a significant association with body mass, and they all appear to be positive (none are below 0 at any point in the CI).
+
+
+Exercise 11.13
+
+a- Here we'll have to simulate a few models; we've already simulated flipper length + species (the first model) and flipper/bill length + bill depth (the third model) but in terms of the problem those are the 3rd and 4th models respectively so I will go ahead and adjust their names to reflect that. I will then simulate the 1st and 2nd models (flipper and species individually).
+```{r}
+#Renaming models
+model3 <- penguins_model
+model4 <- penguins_model3
+
+#simulating model 1
+model1 <- stan_glm(
+  body_mass_g ~ flipper_length_mm,
+  data = penguin_data, family = gaussian, 
+  prior_intercept = normal(4000, 250),
+  chains = 4, iter = 10000, seed = 12345)
+```
+
+```{r}
+#Simulating model 2
+model2 <- stan_glm(
+  body_mass_g ~ species,
+  data = penguin_data, family = gaussian, 
+  prior_intercept = normal(4000, 250),
+  chains = 4, iter = 10000, seed = 12345)
+```
+
+b- Below are the pp check plots for the 4 models:
+```{r}
+pp_check(model1)
+pp_check(model2)
+pp_check(model3)
+pp_check(model4)
+```
+
+All of these plots have significant variance near the peak; I can't determine which one is the exact "best" but I would say that the 4th one has the most overlap with y overall.
+
+c- First we can remove the NA values:
+```{r}
+penguins_complete <- penguins_bayes %>% 
+  select(flipper_length_mm, body_mass_g, species, 
+         bill_length_mm, bill_depth_mm) %>% 
+  na.omit() 
+```
+
+Now we can use the 10-fold cross validation to compare the models:
+```{r}
+prediction_summary_cv(model = model1, data = penguins_complete, k = 10)
+prediction_summary_cv(model = model2, data = penguins_complete, k = 10)
+prediction_summary_cv(model = model3, data = penguins_complete, k = 10)
+prediction_summary_cv(model = model4, data = penguins_complete, k = 10)
+```
+
+Overall, it looks like model 3 has the lowest MAE, but model 1 has the highest within 50% range.
+
+d- Below are the ELPD estimates:
+```{r}
+# Calculate ELPD for the 4 models
+set.seed(12345)
+loo_1 <- loo(model1)
+loo_2 <- loo(model2)
+loo_3 <- loo(model3)
+loo_4 <- loo(model4)
+
+# Results
+c(loo_1$estimates[1], loo_2$estimates[1], 
+  loo_3$estimates[1], loo_4$estimates[1])
+```
+
+```{r}
+# Compare the ELPD for the 4 models
+loo_compare(loo_1, loo_2, loo_3, loo_4)
+```
+
+Based on the ELPD, model 4 is by far the "best" model in terms of posterior predictive accuracy.
+
+e- I would argue that model 4 is the "best" model; while models 1 and 3 had better within 50% intervals and MAE, they were very very close numerically between all of the models, while the ELPD difference seems larger, so I am more willing to trust the ELPD results. 
+
+
+Exercise- tell a bit about the data you will use for next week's presentation
+
+I'm planning on using the dataset from my undergrad senior honors thesis on how breakups impact social media networks; I haven't decided which of my analyses I want to re-do in Bayesian statistics, but I was thinking of doing one to two models on interpersonal electronic surveillance (IES)'s impact on breakup distress (would either be a normal or a gamma-poisson model), and maybe one model on digital possessions (deleting/untagging photos)'s impact on social media use (with another model adding in a "control" variable of age or long distance). This I'm not sure if it would be a beta-binomial or a gamma-poisson since the dependent variable (change in social media use) is a dummy mariable, so I could make it a 0-1 "probability of changing social media use" and have that be a beta-binomial model (which is what I believe is correct) or I could examine if I need to change the way the data is operationalized to apply it to a gamma-poisson model.
+
+
+
+
+
+
+
+
+
