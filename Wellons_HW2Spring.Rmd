@@ -1,0 +1,237 @@
+---
+title: "Wellons_HW2"
+author: Madelynn Wellons
+date: 1/12/22
+output: html_document
+---
+
+```{r}
+#loading packages
+library(tidyverse)
+library(ggplot2)
+```
+
+
+Chapter 3
+
+
+1. A variable is observations of the same measurement (e.g. incomes of Sociology PhD graduates at Duke in 2010).
+
+
+2. 
+
+a- Count
+
+b- Categorical
+
+c- Count
+
+d- Continuous
+
+e- Count
+
+f- Count
+
+g- Categorical
+
+h- Qualitative
+
+i- Ordinal
+
+
+3. B (distribution)
+
+
+4. 
+```{r}
+Salaries <- c(85000, 85000, 85000, 85000, 85000, 90000, 90000, 90000, 90000, 100000, 120000, 120000, 125000, 125000, 125000, 130000, 130000)
+summary(Salaries)
+```
+a- Average (mean) is $103,529
+
+b- Median is $90,000
+
+c- Min= $85000; max= $130000
+
+d- IQR= 125000-85000 = $40000
+
+
+5. C (Greek letters)
+
+
+6. A (log transforming the variable)
+
+
+7. D, A, C, B
+
+
+8. 
+
+a- The distribution is a semi-normal distribution,  peaking around 80 with a bit of a "bump" again around 83 and then having a right skew
+
+b- Yes, the skew is to the right
+
+c- The median would be a better measure due to the skew of the distribution
+
+d- I would use IQR here, since min/max won't take into account the skew, and SD might not cover the "bump" and the skew as well as the IQR would
+
+
+9. B (the mean is less than the median)
+
+
+10. 
+
+a- Ordinal
+
+b- Count
+
+c- A bar graph would be the best:
+```{r}
+#creating the data frame
+StuDist <- data.frame(name=c("freshman", "sophomore", "junior", "senior"), value=c(1000, 1200, 900, 1500))
+
+#plotting the data
+ggplot(StuDist, aes(x= fct_inorder(name), y=value)) +
+  geom_bar(stat = "identity")
+```
+
+
+11.
+
+a- I collected data from my family on their age:
+```{r}
+age <- c(23, 26, 29, 32, 60, 61)
+summary(age)
+```
+The distribution has two clusters of data (with me and my 3 sisters on one, and my parents' ages on another) but is largely just single datapoints (unless plotted as a histogram with large bins, in which case it could be a basic U shaped distribution).
+
+The summary statistics are above, but I will also write them out below:
+
+Range- 23 to 61
+
+Mean= 38.5
+
+Median= 30.5
+
+IQR= 53-26.75 = 26.25
+
+b- The theoretical distribution may have been the ages of people in the US, which is somewhat left-skewed (more old people than young)
+
+c- No I don't believe it would; there are 2 parents in my family and more than 2 children, so the younger ages are overrepresented.
+
+
+
+Chapter 4
+
+
+1. A conditional distribution is the distribution of a variable given the value of another variable (e.g. the example in class of income given that someone did or did not have a college degree)
+
+
+2. 
+
+a- The conditional mean of depression is lower as income increases
+
+b- No; the graph shows that there may be a relationship between income and depression, but it does not show causation (including the direction of any potential causal relationship)
+
+
+3. 
+
+a-
+```{r}
+#base of seniors
+288+338
+
+#probability
+288/626
+```
+The probability of receiving financial aid given that the student is a Senior is 46%
+
+b- 
+```{r}
+#base of those who receive fin aid
+508+349+425+288
+
+#prob
+288/1570
+```
+The probability of being a senior given that the student receives financial aid is 18.4%
+
+c- 
+```{r}
+#base of freshmen
+508+371
+
+#prob
+508/879
+```
+The probability of receiving financial aid given that the student is a freshman is 57.8%
+
+
+4. Two advantages are that it gives us the conditional mean of Y for any X value, and it can cleanly describe the relationship between Y and X (positive or negative based on the slope, etc.). A disadvantage is that it requires being aware ahead of time what type of line we can use to describe the relationship.
+
+
+5. 
+
+a- 
+```{r}
+4-(3.5*6)
+```
+The conditional predicted mean of Y when X=6 is -17
+
+b-
+```{r}
+4-(3.5*-2)
+```
+The conditional predicted mean of Y when X=-2 is 11.
+
+
+6. C (covariance)
+
+
+7. Correlation and covariance are similar concepts, but correlation is rescaled/standardized (to calculate the correlation you can divide the covariance by the SD of X and SD of Y).
+
+
+8. 
+
+a- The shape is linear, a straight line
+
+b- The shape is a curve (a U shape)
+
+c- The curve fits the data better because the residuals would be much lower- the line overlaps with much more of the data than the first example
+
+d- For Figure A, the residuals for the math exam scores of about -2 and 2-3, the data are above the line (and the further they are from 0, the further away from the line they are), while the residuals of -1 to 2 are below the line/curve by about the same amount.
+
+
+9.
+
+a- Residuals:
+```{r}
+5.07-4.72
+4.05-4.28
+5.33-5.38
+4.02-4.22
+3.59-3.45
+```
+
+The residuals are .35, -.23, -.05, -.2, and .14
+
+b- OLS uses residuals by finding the line where, when the residuals are squared and summed, that value is as low as possible. 
+
+
+10. 
+
+a- One variable that could explain the correlation is income level
+
+b- If Y is graduation rate, X is first gen status, and Z is income level, we could use the following 5 steps (in the textbook as well):
+
+1- Get the mean of Y conditional on Z
+
+2- Subtract out that conditional mean to get the residual of Y (Y^R)
+
+3. Get the mean of X conditional on Z
+
+4. Subtract out that conditional mean to get the residual of X (X^R)
+
+5. Describe the relationship between Y^R and X^R
+
+c- In step 5, all of the influence of Z (the income level) on the relationship has been removed, so you could interpret the residuals remaining as controlled for income level (you would interpret them as normal residuals- the higher means the relationship is not too strong as the points are not close to the line of best fit)
