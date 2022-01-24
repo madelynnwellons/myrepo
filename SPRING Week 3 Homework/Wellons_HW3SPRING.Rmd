@@ -1,0 +1,52 @@
+---
+title: "Wellons_HW3"
+author: "Madelynn Wellons"
+date: "1/23/2022"
+output: html_document
+---
+
+Chapter 5
+
+
+1. Three assumptions I made were that 1) the chair is solid, 2) the chair can hold my weight, and 3) I am solid (and therefore would not pass through the chair given assumption 1)
+
+
+2. B
+
+
+3. I'm using an NPR article, "Why rapid COVID tests aren't more accurate and how scientists hope to improve them". They utilized a few studies in this article, but I'll use the first study (also the study that they wrote the most about). For the study, the scientists used live samples of the omicron variant to assess rapid COVID tests using different concentrstions of COVID-19 in the samples- it doesn't explain if they used a control group, how many tests they used, etc. but they did find that "some" rapid tests (again, no specific number or percentage) didn't detect COVID-19 at some concentration level (again, not specified what level) that the tests would have been "expected" to catch with other variants. It is possible that, especially considering how vague a majority of their findings were (the % of tests, the concentration of virus that was not being detected, the difference between that % and the % of concentration needed to detect other variants), the results were actually non-significant and there was no difference between omicron and other variants in terms of the rapid tests' sensitivity. The study didn't have any other ways of blocking out this alternative explanation, since they did not elaborate on the statistical significance of the finding or give the actual numerical difference between the other variants (which they also did not test- this is as "assumed" concentration that they "expect" to find other variants at). Since this was a laboratory study with no other main sources of variation, I don't see any other potential explanations.
+
+
+4. 
+
+a- Alternative explanations could include that richer people eat caviar more often than poorer people, and a higher income leads to better access to healthcare which is linked to a longer lifespan; another alternative explanation could be the geographical availability of caviar (more near the ocean, presumably)- perhaps the environment in which people live could have an impact on their lifespan compared to people who do not live near the ocean.
+
+b- Variation within these groups (higher income, people who live near the ocean) could show that these alternative explanations are incorrect, since then the variation would be caused by the caviar consumption and not the income or environmental factors.
+
+c- The authors could randomly assign people to eat caviar at least once a week and track their lifespan- however that would be a very very long longitudinal study, so I'm not sure how practical that would be.
+
+
+5. 
+
+a- An alternate explanation is that the president was found guilty of insider trading and sold all of his stocks before the stock market drop, and the decline in approval ratings is due to the insider trading accusations (not the actual market drop itself)
+
+b- During the summer, people tend to dine out more often compared to other seasons
+
+c- People who visit the hospital are usually already sick
+
+d- There is an office dress code that employees must follow, including CEOs
+
+
+6. A variable that causes both the treatment and outcome variables is concerning for identification because it creates alternative explanations; the book uses the example of alcohol and mortality, and how there are numerous variables that influence both (such as being a risk-taker, being a smoker, etc.). 
+
+
+7. 
+
+a- Since they state that the same people are wearing each type of shoe (they don't say 'people who wear x shoe run faster than people who wear an average shoe', they say that people who wear x shoe run faster than if they wore an average shoe), it is likely a same-subjects design. Therefore, the data generating process would be people (uncertain how they are selected)
+
+b- It depends on how they selected the participants; assuming they did a within-subjects design, the variation would need to come from the sample as a whole. For example, if they chose current customers, it could be that people who buy from this brand recognized its' logo on the shoe and it served as a "placebo effect" in that they saw the expensive brand and thought that the shoe must be better.
+
+c- An alternative explanation not on this list could be that people in the study may have already owned this type of shoe and were more familiar with it, or that the "average shoe" was uncomfortable, so the difference in familiarity or comfort of the shoes could have caused the speed increase, not the actual Mistrunner shoe itself
+
+
+8. B (variation)
