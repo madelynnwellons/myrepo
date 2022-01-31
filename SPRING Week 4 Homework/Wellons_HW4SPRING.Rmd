@@ -59,7 +59,7 @@ c- Other variables include demographic variables that may influence either of th
 
 d- 
 ```{r}
-knitr::include_graphics("IMG_4652 Small.png")
+knitr::include_graphics("IMG_4652.png")
 ```
 
 e- Some unobserved variables (which I included in the diagram above) could be their surroundings while taking the survey- there have been studies showing that when people are in surroundings that remind them of inequality, based on their class they will respond to questions about inequality differently (higher income people will be less prone to wealth redistribution, and vice versa for lower income people)
