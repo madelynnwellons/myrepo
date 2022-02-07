@@ -1,0 +1,136 @@
+---
+title: "Wellons_HW5SPRING"
+author: "Madelynn Wellons"
+date: "2/6/2022"
+output: html_document
+---
+
+Chapter 8
+
+1. An Open path is one where all of the variables on the path are allowed to vary (e.g. are not one fixed value), and a Closed path is one where at least one variable on the path has a fixed value (e.g. if you controlled for a variable by only having one value of the variable in an experiment, any paths that use that variable would be Closed).
+
+2. 
+
+a- X -> A -> Y
+X <- B -> Y
+X <- B <- D -> Y
+X -> C -> D <- Y
+X -> C <- D -> B -> Y
+
+b- The front door paths are:
+X -> A -> Y
+
+c- The open back door paths are:
+X <- B -> Y
+X <- B <- D -> Y
+X -> C -> D <- Y
+X -> C <- D -> B -> Y 
+
+d- C and D must be controlled since they are colliders
+
+
+3. 
+
+a- 
+```{r}
+knitr::include_graphics("IMG_4696.png")
+```
+
+b- The front door paths are:
+Income -> Health
+Income -> Access to Healthcare -> Health
+Income -> Access to High-cost Treatments/Drugs -> Health
+
+c- The back door paths are:
+Income -> Stress <-> Health (since stress is a collider)
+
+d- The only path that represents a direct effect is Income -> Health
+
+e- Here it depends on if we are including indirect effects in our research; if we do, then all three of the front door paths count as "good" paths and the one back door is the "bad" path. However, if we are counting only those with direct effects, then Income -> Health would be the only good path and all others would be bad.
+
+
+4. C (front door path, since none of the arrows are pointing back at the treatment/influencing it)
+
+5. 
+
+a- Popularity could be multiple different types of variables depending on how you measured it; it could be a dummy variable if you measured just popular/not popular, rank order if you ranked each professor's popularity, or ratio/interval (depending on how you did this) if there was a scale of popularity. 
+
+b- If we controlled for popularity, the causal paths would all not be working, since you can't control for the dependent variable.
+
+
+6.
+
+a- List of paths:
+Lockdown -> Recession
+Lockdown -> Unemployment -> Recession
+Lockdown -> Unemployment <- PriorEconomy -> Recession
+Lockdown <- PriorEconomy -> Recession
+Lockdown <- PriorEconomy -> Unemployment -> Recession
+
+b- Front door paths:
+Lockdown -> Recession
+Lockdown -> Unemployment -> Recession
+
+c- If unemployment was controlled, it would be much easier to test the hypothesis since this is the major variable "in the way" of the analysis (particularly for the front door path lockdown -> UE -> recession)
+
+d- I think it is possible to measure these adequately, since they are either dummy variables (e.g. lockdown as yes/no) or standard economic variables that are widely available (e.g. the unemployment rate)
+
+e- Another variable that could be relevant is vaccination rate; even when countries were not locked down, before vaccines were widely available people tended to be reluctant to go outside and spend their disposable income, which could contribute to a recession.
+
+
+7. A few Bad paths in a causal diagram from higher education -> income could be:
+Higher education <- parent's income -> income 
+Higher education <- highest degree achieved by parents -> income
+
+
+Chapter 9
+
+
+1. B (natural experiment- the researcher is unable to control randomization here)
+
+2. 
+
+a- When trying to isolate front door paths, the variation must only have back doors you can close (or alternatively, can have at least some variation in the treatment that doesn't have back doors)
+
+b- We know that the variation from a RCE fulfills these conditions because having randomization + an experimental design closes the back doors for all of the other variation besides that of the treatment variable.
+
+
+3. Differences:
+a- In natural experiments there may be back doors from the natural randomness to the outcome (but this won't be the case for RCEs)
+b- Observations in natural experiments are more realistic
+c- Experiments remove any treatment occuring for outside reasons (only seeing the effect among people who are sensitive to natural randomness)
+d- It is more difficult to convince people of the exogeneity of pure randomization in natural experiments
+e- (bonus) Sample size tends to be bigger for natural experiments
+
+
+4. One question is, does drinking alcohol while pregnant cause infants to die of SIDS more often? We can't study this in a randomized experiment because it is unethical; all of the data on this question gathered so far has been from natural experiments.
+
+
+5. Exogenous variation is variation in treatment that has no open back doors
+
+
+6.
+
+a-
+```{r}
+knitr::include_graphics("IMG_4698.png")
+```
+
+b- Paths:
+Alcohol consumption -> SIDS
+Alcohol consumption -> health -> SIDS
+Alcohol consumption <- addiction -> drug use -> SIDS
+
+c- The third path (alcohol consumption <- addiction -> drug use -> SIDS) needs to be closed
+
+d- It is likely that there are more variables that influence SIDS (sudden infant death syndrome) than I am aware of that were not included; I think it may be difficult to close the path with the addiction variable because not all people have reported their addiction to their doctors. 
+
+
+7. B (exogenous variation removes back doors, similar to an experimental design, so its' predictions shouldn't have back doors either)
+
+
+8. 
+
+a- If we're only including the variables listed in this question, I don't believe there are any back doors. However if we're including back doors that would exist within this situation even if those variables were not mentioned, then I could see many potential back doors here; for example, one could be other foreign relations policies that were being passed at the same time period. 
+
+b- I would believe them because I think there are other variables that more strongly influence people's opinions of the US, such as the President at the time (Donald Trump) that made most people lose respect for the country
