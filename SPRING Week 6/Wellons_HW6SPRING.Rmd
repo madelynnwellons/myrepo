@@ -1,0 +1,123 @@
+---
+title: "Wellons_HW6SPRING"
+author: "Madelynn Wellons"
+date: "2/13/2022"
+output: html_document
+---
+
+Chapter 10
+
+
+1.
+
+a- Conditional average treatment effect is the ATE but "conditional" on being a part of a certain group within your sample
+
+b- Average treatment on the treated is the ATE for people who received the treatment within your sample
+
+c- Averaged treatment on the untreated is the ATE for people who did not receive the treatment within your sample
+
+
+2. A treatment effect that I would expect to be highly heterogenous would be a drug that would impact people differently depending on their current weight; for example, a drug that is absorbed through body fat (some sort of injection potentially), that way the weight of the person (or more accurately, the % body fat of a person) could influence how much of the drug's effect is implemented versus just being absorbed by the body fat before reaching the bloodstream. This would be heterogenous because people come in many different shapes and sizes; weight is highly variable between people.
+
+
+3. 
+
+a- 
+```{r}
+#ATE is sum of effect/number of cases
+(7+3+7+8+7+4)/6
+```
+The overall ATE here is 6
+
+b- 
+The conditional ATE (for women) is 4.67
+```{r}
+#conditional ATE is sum of effect for group/cases in group
+(3+7+4)/3
+```
+
+c- This would be a variance-weighted average treatment effect, because we want to close the backdoor explanation of non-binary people receiving treatment almost all of the time (while women only receive it about half the time) and we are weighting (controlling) for differences between women and non-binary people. As far as the kind of numerical estimate we would get, it would likely be more similar to what the women's CTE would be in this sample since a majority of the variance in the sample of women + non-binary individuals is within the women
+
+d- Technically here this would be an ATE since they are comparing all treated people to all control people (or theoretically, if there was an option to be calculating 2 different numbers since that seems to be more of what they're going after, they would be calculating an average treatment on the treated and an average treatment on the untreated, but since they are just calculating the one effect, it is the ATE). The numerical estimate is going to be as though you did a conditional treatment effect on men however, since men are the only members of the sample who are teenagers (the result would be 7).
+
+
+4. An example where the ATE on the treated would be more useful than the overall ATE would be when a portion of your sample is untreated but you do not need to know about their effects since it is not applicable to them- the book gives an example of a drug intended for women, so the women in the sample are the ones taking it but the men are still included in the overall ATE, but since we do not need to know their effect, the ATE on the treated would be more helpful. I would give a similar example- an ATE on the treated would be more useful in the case of measuring a weight loss drug that is only effective on people above 150 pounds, so if we only treated people over 150 pounds we would use the ATE on the treated.
+
+
+5. C (intent to treat)
+
+
+6.  
+
+a- A variance-weighted treatment effect is when each person's TE is weighted based on variation within their treatment variable (after closing back doors)
+
+b- A distribution-weighted treatment effect is when you select a sample where treated/untreated are similar in terms of the variables on the back door paths (so they "match" each other)
+
+c- We would see variance-weighted TE's when we've closed back doors, since we've gotten rid of a lot of the variation already. We would see a distribution-weighted TE when we selected a sample purposefully so that the back door path's variables are matching/similar between two groups
+
+
+7. This would be a conditional ATE, since our population of interest is all adults in the US but our sample is only college students, so the ATE is conditional on being a college student
+
+
+8.
+
+a- ATE
+
+b- Conditional ATE
+
+c- variance-weighted TE
+
+d- Intent to treat
+
+e- AT on the treated
+
+
+
+Chapter 11
+
+
+1. Here we could figure out which of these characteristics influence the treatment variable (e.g. region could influence if a college opened or not, adn that is a campus characteristic variable that is constant over time), and only measure those that do influence the treatment variable (since they will then be related to the front door paths that you will be measuring).
+
+
+2. This method would let us ignore back doors related to unmeasured variables because, now that we have isolated the front doors, it has taken into account all exogenous variation and we only have to concern ourselves with the treatment and outcome variables.
+
+
+3. 
+
+a- Robustness tests are methods of disproving assumptions; usually by testing an assumption (e.g. removing an assumption from an analysis and seeing if the data changes or not)
+
+b- The purpose of a robustness test is to see if we can prove an assumption is false
+
+c- A placebo test is a test that "pretends" the treatment is being assigned somewhere it isn't + you can check if there is an estimated effect (there shouldn't be)
+
+
+4. Five variables could be income, access to transportation, hard work/dedication, having a part time job, and stress. No it is not feasible to measure and control all of these variables; two of these are subjective (hard work/dedication), although we could ask the participants to fill out social psychology scales relating to those measurements. 
+
+
+5. Partial identification is a method that lets us essentially estimate the effect of assumptions we are not as certain about on our data, which can given us ranges (e.g. we can determine bounds for an assumption we are not certain about)- it is "partially identifying" the effect of an unknown/unproven assumption.
+
+
+6.
+
+a-
+```{r}
+knitr::include_graphics("Picture1.png")
+```
+
+b- LawAndOrderPolitics and ExpectedCrimePayout
+
+c- We would need to control for the variables SentencingLaws and PolicePerCapita
+
+d- I would conclude that there is another variable that is creating this relationship that was not accounted for on the diagram; either that, or that there is, in fact, a direct effect of LawAndOrderPolitics on ExpectedCrimePayout (or vice versa)
+
+
+7. D (the effect is no larger than 2 percentage points)
+
+
+
+
+
+
+
+
+
