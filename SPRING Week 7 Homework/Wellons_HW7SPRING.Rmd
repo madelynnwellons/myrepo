@@ -1,0 +1,221 @@
+---
+title: "Wellons_HW7SPRING"
+author: "Madelynn Wellons"
+date: "2/19/2022"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(broom)
+library(broom.mixed)
+library(modelsummary)
+library(dplyr)
+library(ggplot2)
+```
+
+
+Chapter 13- Conceptual Homework
+
+
+1. 
+
+a- The error would be 1, since 2+3*2=8, which is 1 less than 9
+
+b- I'll use R to calculate this one since it'll be hard to do decimals in my head:
+```{r}
+1.9 + (3.1*2)
+```
+Since we got 8.1, the residual for observation A is .9 (9-8.1 is .9)
+
+
+2. Here, we can ignore C since it does not have an effect on Y (except through X, whose value we are aware of) so our equation would be:
+
+Y = Bo + B1A + B2B + B3AB
+
+I added the third term (B3AB) because B influences A, which to me indicates that there is an interaction there that needs to be taken into account (since both A and B influence both X and Y as well).
+
+
+3. (note: for this problem, assuming me typing B1 is actually B^ 1 subscript as it is in the homework problem, aka it is B1 for the sample not the population)
+
+a- For every one unit increase of X, Y will increase by 3 units
+
+b- Using a two sided test here (which I haven't done in a while, so I am hoping this is accurate), the H0 would be that B1=0 and the alternate hypothesis is H1 is not 1; the rejection region is 2.5% on either side (since it's a 2 tailed test). Calculating the Z score below:
+```{r}
+#The problem says to assume an infinite sample size, but I don't really know how to put that into R, so I'm substituting the square root of infinity for 1 
+3/(1.3/1)
+```
+Since the rejection region is anything below -1.96 or above 1.96, and 2.3 is above 1.96, we can say that B1 is statistically significantly different from 0 at the 95% confidence level.
+
+c- This means that X must have some effect on Y within our sample- since B1 is the coefficient for X and it is significantly different from 0, when X increases or decreases there is some effect on Y.
+
+
+4. 
+
+a- Controlling for number of children is in model 3, so the additional hours worked with a one unit increase of years of education when controlling for number of children is 76.185
+
+b- This relates to model 2; the standard error for children under 5 coefficient (not controlling for years of educ) is 19.693
+
+c- If children is 0 and education is 0, then the predicted number of hours worked would be the intercept, which for model 3 is 306.553
+
+d- In each regression, 3382 observations are used
+
+e- Yes; the p value in both models for this coefficient is less than .01, so at the 95% level it is also statistically significant
+
+
+5. 
+
+a- It will increase AnnualHoursWorked by 110.230, but decrease it by 1.581YearsEducation^2, so the final amount is determined by the actual value of the number of years education variable
+
+b- 
+```{r}
+(1.581*17^2)-(1.581*16^2)
+
+110.23-52.173
+```
+If the current level of YearsEducation is 16, a one unit increase (to 17) would cause a 58.057 unit increase in annual hours worked
+
+c- It is getting less positive for higher values; since the negative term is dependent on yearseducation^2, that will increase at a much steeper rate as years of education increase.
+
+d- Adding extra powers of Years Education would likely overfit the model, as the more polynomials are added to a regression model, the more likely it is for a model to be overfit
+
+
+6. 
+
+a- The coefficient on Homeowner means that in this model, homeowners work an extra 50.174 hours annually when compared to non-home owners
+
+b- 
+On average, people with 4 children under the age of 5 work 150.492 hours less annually compared to people with 3 children under the age of 5
+```{r}
+773.412-923.904
+```
+
+c- From this table alone, no we cannot tell that- we would need to do a t test (or other similar type of test) to determine if the two coefficients are statistically significantly different from one another
+
+
+7. 
+
+a- In model 1, when education increases by one unit, annual hours worked increases by 110.073 hours if they are not a homeowner. If they are a homeowner, the increase would only be by 56.139 hours.
+```{r}
+110.073-53.934
+```
+
+b- Annual earnings (assuming this is the same as annual hours, since there is no annual earnings variable) rise more quickly for non-home owning families, although homeowning families have a higher base value of hours worked  (an extra 682.992, which is equivalent to 6 extra years of education for non-homeowners) the actual rate of increase is higher for non-homeowners since the negative interaction term is not accounted for. Yes, the interaction term that influences the differing rate of earning based on homeownership and education is significant at the .01 level, so it is statistically significant at the 95% level.
+
+c- For Homeowners, every one unit increase in education decreases their annual hours worked by 53.994 (note: this is only true when this is the only coefficient being taken into account, in reality if the education coefficient is taken into account as well, homeowners increase by 56.139 units for every year of education overall)
+
+d- For every one unit increase of education, the log of annual hours worked increases by .067
+
+e- 
+A 10% increase in education increases the annual hours worked by 83.2347
+```{r}
+.1*832.347
+```
+
+f- I'm not 100% sure, but if I had to guess I would say that after taking the log values, there may have been data that transformed into outliers that needed to be removed from the model
+
+
+8-9 skipped
+
+
+10. Pollsters could utilize sample weights to solve this problem; since they have the proportion of each demographic in their population, they would use sample weights to "weight" the responses of people from demographics that are underrepresented more heavily in the data
+
+
+11. A (since this error has to do with the true value, while the other two are issues with the actual practice of measurement or having a variable that is operationalized incorrectly)
+
+
+
+Coding Homework
+
+
+1. Loading dataset
+```{r}
+dengue <- read.csv("https://vincentarelbundock.github.io/Rdatasets/csv/DAAG/dengue.csv")
+```
+
+
+2. Regression
+```{r}
+m2 <- lm(NoYes ~ humid, data=dengue )
+
+msummary(m2, stars=TRUE)
+```
+
+
+3. With the intercept at -.416, this means that when humidity is 0, the probability of dengue being observed decreases by about -.416. With the slope being .05, this means that for every one unit increase in humidity, the probability of dengue being observed increases by .05
+
+
+4. 
+```{r}
+summary(dengue$humid)
+```
+This helps us understand the intercept in the last question, because the minimum value of humidity in this dataset is .6714, so there is no situation in which the intercept would actually be applicable (since humidity is never 0 in this dataset)
+
+
+5. 
+```{r}
+m5 <- lm(NoYes ~ humid + temp, data=dengue)
+
+msummary(m5, stars=TRUE)
+```
+
+6. 
+```{r}
+m6 <- glm(NoYes ~ humid + temp, data=dengue,
+       family = binomial(link = 'logit'))
+
+msummary(m6, stars = TRUE)
+```
+
+Now we can get the marginal effects:
+```{r}
+library(margins)
+```
+
+```{r}
+m6 %>%  margins(variables = 'humid') %>% 
+    summary()
+
+m6 %>%  margins(variables = 'temp') %>% 
+    summary()
+```
+
+The average marginal effect for humidity is .0317, while the average marginal effect for temp is .0042
+
+
+7. 
+```{r}
+#removing NA values
+dengue2 <- dengue %>% filter(!is.na(dengue$humid))
+#creating model 7
+m7 <- lm(temp ~ humid, data = dengue2)
+resid(m7)
+```
+
+WAY too many residuals here to properly analyze in a table, so going to plot this- since we're comparing the residuals to the independent variable, we'll have the x axis be temperature
+```{r}
+plot(dengue2$temp, resid(m7))
+```
+
+There is a lot of heteroskedasticity here! There is a relationship of some sort between the residuals and temperature. Now to re-run the model with heteroskedasticity-robust SEs:
+```{r}
+#using the 3rd method from the book since it seems easier to compare the two models this way
+library(fixest)
+m7b <- feols(humid ~ temp, data = dengue2, se = 'hetero')
+
+msummary(m7)
+msummary(m7b)
+```
+
+It looks like the SE only changed minorly between models, so they are likely both heteroskadistic
+
+
+8. 
+```{r}
+m8 <- feols(log(humid) ~ temp, data = dengue2, se = 'hetero')
+msummary(m8, stars = TRUE)
+```
+
+For every one unit increase in temperature, there is (on average in the model) a 5.6% increase in humidity (or a .056 increase in log humidity).
+
+9- optional
