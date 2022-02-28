@@ -1,0 +1,290 @@
+---
+title: "Wellons_HW8SPRING"
+author: "Madelynn Wellons"
+date: "2/26/2022"
+output: html_document
+---
+
+
+Chapter 14 Conceptual Homework
+
+
+1. 
+
+a-
+Since we're adjusting the treated group, the control group's weights will all be 1
+
+b- 
+```{r}
+#100 in control group and 100 in treatment
+#In the example in the book in 4.2 that Nick is telling us to follow, the weights are calculated for the untreated groups by dividing the # of treated in that subgroup by # of total untreated, but we're essentially doing the opposite since we're making the treated group match the control instead of the other way around (note: I did this question the way they did in the book by accident at first and didn't realize how wrong it was until the end of part c! So hopefully this way is correct)
+#Weight for left handed treated group
+10/100
+#Weight for ambidextrous treated group
+2/100
+#Weight for right handed treated group
+88/100
+```
+
+
+c- 
+```{r}
+#left handed
+(.1)/(.1+.02+.88)
+#ambidextrous
+(.02)/(.1+.02+.88)
+#right handed
+(.88)/(.1+.02+.88)
+```
+
+d-
+```{r}
+#Weighted average score for treated group
+(.1*7)+(.02*4)+(.88*6)
+```
+Weighted average = 6.06
+
+
+e- Since the average penmanship in the control group is 5, we would estimate that the effect of practicing cursive would be an additional 1.06 on the penmanship score
+
+
+2. 
+
+a- kernel matching
+
+b- k-nearest-neighbor distance matching
+
+c- propensity score matching
+
+d- one-to-one distance matching
+
+
+3. 
+
+a- B (multiple control matches)
+
+b- A (wider bandwidth- allowing more bad matching -> bias)
+
+c- B (selecting matches without replacement)
+
+d- B (weight that decays with distance)
+
+
+4. Since exact matching requires an "exact match" for each observation, when there are several matching variables or if the sample size is small, so many observations will be dropped that there will be many issues (the treated effect estimates will be "noisy", there is poor representation of the actual data, etc.)
+
+
+5. First they took each matching variable (athleticism, income, gender, race, and middle school grades) and divided its value by its standard deviation. Then, in order to match each observation, they calculated the Mahalanobis distance for each potential match (with replacement) by summing the squares of all of the differences between individual treated observations (high school grades for those that participated in high school sports) and the control observations (high school grades for those that did not participate in high school sports) and then taking the square root (calculating the sum of squared residuals)- if the caliper is below .3 for all potential matches for an observation, that observation would be dropped.
+
+
+6. B (focuses on matching on differences that close back doors, not all differences- but I'm not sure if this is actually a downside? D was my second choice here)
+
+
+7. 
+
+a- The assumption fails for retail businesses with 1-5 employees since there are no retail businesses of that size in the untreated group
+
+b- This is a concern but only because we are also looking into treated service businesses with 11-20 employees (and for the average treatment on the treated, for those with 11-20 employees the ATT would be heavily over-representing the service industry there) 
+
+c- There is the concern of bias; since we would be weighting the untreated service business with 11-20 employees heavily (since there are 5 of those observations in the treated group), if that one service business is not similar to those in the population (for reasons outside of the effect of the treatment/lack of treatment) then it could cause the ATE to be over or under estimated (based on which direction the effect is in)
+
+d- Since we would be dropping a significant amount of treated observations, our treatment effect is only applicable to those that matched well- in addition, since we have service and retail observations, for the 1-5 employees group the treatment effect would be overrepresenting the service industry (which may have a different effect compared to the retail industry)
+
+
+8.
+
+a- No, there are no statistically significant differences at the 95% level
+
+b- I would look into making a love plot, and secondly I would compare distance via a means test/standardized difference in means
+
+c- I would need to make sure that these matching variables aren't actually included in a back door explanation (since those are usually the only variables that propensity scores are controlling for)
+
+
+9. For both of these, the observations that are staying the same (they are being "matched to", so we are finding matches for them from the treated/untreated group depending on which example), so for the observations that we are keeping the same/attempting to find matches for, they are the type that we are looking for the effect (this is a very long winded way of saying that we're looking for the counterfactual for each respective group)
+
+
+
+Coding Homework
+
+
+Loading packages
+```{r}
+library(causaldata)
+library(MatchIt)
+library(WeightIt)
+library(cobalt)
+library(tidyverse)
+library(broom)
+library(haven)
+library(dplyr)
+```
+
+
+1. 
+```{r}
+data("nsw_mixtape")
+nsw <- nsw_mixtape
+nsw <- nsw %>% select(-data_id)
+```
+
+
+2. 
+```{r}
+nsw <- nsw %>% mutate(weight = 1)
+
+#will glimpse at the data since I'm getting warning messages
+glimpse(nsw)
+#everything looks fine here!
+```
+```{r}
+#experimental estimate via regression
+m1 <- lm(re78 ~ treat,
+           data = nsw, weights = weight)
+tidy(m1, conf.int = TRUE)
+```
+```{r}
+#weighted balance table using Steve's code instead of the example code in the HW problem
+nsw |> 
+  group_by(treat) |> 
+  summarize(across(age:re75, ~ weighted.mean(.x, weight)))
+```
+
+2b- Yes, it's difficult to tell how much of a difference is significant but the difference for Hispanic is fairly large as well as for no degree (.06 compared to .108, .835 compared to .708); some other variables seem to have a larger difference than the rest (like married or re75)
+
+
+3. 
+```{r}
+#### do the matching
+match1 <- matchit(treat ~ age + educ + black + hisp + marr + nodegree +
+                    re74 + re75,
+                  data = nsw,
+                  method = "nearest",
+                  distance = "mahalanobis",
+                  estimand = "ATT",
+                  ratio = 3,
+                  replace = TRUE)
+```
+
+```{r}
+#### get matched data for calculating weighted difference
+md1 <- match.data(match1)
+
+#### compute weighted difference (ATT)
+matchdiff1 <- lm(re78 ~ treat,
+                 data = md1,
+                 weights = weights)
+tidy(matchdiff1, conf.int = TRUE)
+```
+
+The post-matching ATT of treat on re78 is 2027.9
+
+
+4. 
+```{r}
+#### summary
+md1 %>% group_by(treat) %>% 
+  summarize(across(age:re75, ~ weighted.mean(.x, weights)))
+
+#### cobalt balance checks
+love.plot(match1,
+          abs = TRUE,
+          binary = "std",
+          thresholds = .1)
+```
+
+The balance has improved for several of the variables, but for marriage and nodegree the absolute standardized mean is still above .1 (more-so for nodegree than for marriage)
+
+
+5. 
+```{r}
+#### do the matching
+match2 <- matchit(treat ~ age + educ + black + hisp + marr + nodegree +
+                    re74 + re75 + 
+                    I(re74^2) + I(re75^2) + I(age^2) + I(educ^2),
+                  data = nsw,
+                  method = "nearest",
+                  distance = "glm",   #logit
+                  estimand = "ATT",
+                  replace = TRUE)  
+
+#### get matched data 
+md2 <- match.data(match2)
+
+#rename distance to propensity
+md2 <- rename(md2, propensity=distance)
+
+#trim propensity scores
+md2p <- md2 %>% mutate(trimmed = ifelse(propensity <= .05 | propensity >= .95, NA_real_, propensity))
+```
+
+
+6. 
+```{r}
+#Assuming we're adding the ipw to the trimmed propensity scores data (md2p)
+md3 <- md2p %>% mutate(ipw = case_when(
+  treat == 1 ~ 1/propensity,
+  treat == 0 ~ 1/(1-propensity)
+))
+```
+```{r}
+#estimating treatment effect in linear regression
+matchdiff2 <- lm(re78 ~ treat,
+                 data = md3,
+                 weights = ipw)
+tidy(matchdiff2, conf.int = TRUE)
+```
+
+The treatment effect here is 1078.5
+
+
+7. 
+```{r}
+#not 100% sure which data I should be using, I'm going to use match2 since that has the matching for the propensity scores
+bal.plot(match2, which = "both", mirror = TRUE)
+```
+
+Common support here looks pretty good; there are some observations on the ends of the distribution that do not have any match, and were trimmed (if a part of the control group- there are some observations for the treated group in the adjusted sample that do not have a match but are still included) but overall a majority of the sample has matches
+
+
+8. 
+```{r}
+library(boot)
+library(tidyverse)
+
+br <- nsw
+
+#Function to do IPW estimation with regression adjustment
+ipwra <- function(br, index = 1:nrow(br)) {
+  #apply bootstrap index
+  br <- br %>% 
+    slice(index)
+  
+  #estimate and predict propensity score
+  m <-  glm(treat ~ age + educ + black + hisp + marr + nodegree +
+                    re74 + re75 + 
+                    I(re74^2) + I(re75^2) + I(age^2) + I(educ^2),
+            data = br, family = binomial(link = 'logit'))
+  br <- br %>% 
+    mutate(ps = predict(m, type = 'response'))
+  
+  #Create IPW weights
+  br <- br %>% 
+    mutate(ipw = case_when(
+      treat == 1 ~ 1/ps,
+      treat == 0 ~ 1/(1-ps)
+    ))
+  
+  #Estimate difference
+  w_means <- br %>% 
+    group_by(treat) %>% 
+    summarize(m = weighted.mean(re78, w = ipw)) %>% 
+    arrange(treat)
+  
+  return(w_means$m[2] - w_means$m[1])
+}
+
+b <- boot(br, ipwra, R = 200)
+#See estimate and standard error
+b
+```
+
+Here the treatment effect is 1607.571
