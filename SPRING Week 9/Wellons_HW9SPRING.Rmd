@@ -1,0 +1,244 @@
+---
+title: "Wellons_HW9SPRING"
+author: "Madelynn Wellons"
+date: "3/19/2022"
+output: html_document
+---
+
+
+Conceptual Homework- Chapter 16
+
+How Does It Work?
+
+
+1.
+
+a- The variation between Zac and Skylar in their vacation-taking (not accounting for year, just average) is calculated as follows:
+```{r}
+#Zac mean
+(3+7+5)/3
+#Skylar mean
+(2+6+10)/3
+```
+The numbers that represent the variation between Zac and Skylar are 5 and 6.
+
+b- To isolate the variation within Zac and Skylar, we'll be subtracting their mean from their value for each year:
+```{r}
+#Zac
+3-5
+7-5
+5-5
+
+#Skylar
+2-6
+6-6
+10-6
+```
+
+c- For this we'll be comparing their between-individual variance (Skylar's mean is 1 higher than Zac's), so the fixed effects estimate will likely give us an answer closed to 2 since Skylar's happiness point is 2 as opposed to 1
+
+
+2.
+```{r}
+knitr::include_graphics("IMG_4879.png")
+```
+
+Closed by fixed effects:
+political polarization of city population -> trust
+size of city -> trust (as well as size of city -> # of events, although that is not the relationship discussed)
+ethnic diversity of the city -> trust (as well as ethnic diversity of the city -> segregation)
+segregation of the city -> trust (as well as segregation of the city -> ethnic diversity)
+
+Open:
+size of events -> trust
+size of events -> # of events (and vice versa)
+
+
+3.
+
+a- Within
+
+b- Within
+
+c- Between
+
+d- Between
+
+e- Combination (since the individual is the genre, but we are comparing an album versus all albums of this genre)
+
+f- Between
+
+
+4. This has the effect of controlling for the individual because by taking the individual-level mean, you are accounting for differences within an individual at different points in time, so you have controlled time-sensitive aspects for this specific individual.
+
+
+How Is It Performed?
+
+
+1. Within the data we have and "controlling for city effects" (a way of explaining the fixed effect on the city) an increase of one cultural event within a city than is typical for that city is associated with an increase of 3.6 in trust levels than it typically is for that city.
+
+
+2. Within the data we have and "controlling" for city and year effects, an increase of one cultural event that is typical for that city is associated with an increase of 2.4 in trust levels than it typically is for that city.
+
+
+3. Firstly it is less complicated in analysis (at least from my perspective); secondly, the polynomial term for time wouldn't fully control for time (or explain the variation caused by time), it would just be able to help predict the results for each given time period.
+
+
+4. B (because random effects allow some amount of between variation into the model, and some of the real individual effect is that between variation)
+
+
+
+Coding Homework
+
+
+```{r}
+library(tidyverse)
+library(plm)
+library(lme4)
+library(broom)
+library(broom.mixed)
+library(modelsummary)
+```
+
+
+1. Downloading data
+```{r}
+mp <- read.csv('https://raw.githubusercontent.com/NickCH-K/TheEffectAssignments/main/mathpnl.csv')
+```
+```{r}
+mp <- mp %>% 
+  select(c('distid', 'year', 'math4', 'expp', 'lunch'))
+```
+
+
+2. 
+```{r}
+#number of individuals as N, can get this from variable distid
+nrow(unique(mp['distid']))
+
+#number of time periods as T, can get this from variable year
+nrow(unique(mp['year']))
+```
+There are 550 individuals (N) and 7 time periods (T)
+
+
+3. 
+```{r}
+#limit to just ID and year
+mp3 <- mp %>% 
+  select(c('distid', 'year'))
+
+#unique function to drop duplicates
+mp3 <- unique(mp3)
+
+#tabulating how many times each year appears
+table(mp3)
+```
+
+The table method is what Nick recommended, but since there are 550 participants we can only see the first 142 in the table- all of those appear equally in each year, however, so I believe we can consider this a balanced panel.
+
+
+4. OLS regression:
+```{r}
+m1 <- lm(math4 ~ expp + lunch, data = mp)
+tidy(m1)
+```
+
+
+5. 
+```{r}
+#copying dataset so I don't write over the variables
+mp5 <- mp
+
+mp5 <- mp5 %>% 
+  mutate(math4_demean= math4 - mean(math4), expp_demean= expp - mean(expp), lunch_demean= lunch - mean(lunch))
+
+#regression
+m2 <- lm(math4_demean ~ expp_demean + lunch_demean, data = mp5)
+tidy(m2)
+```
+
+
+6.
+```{r}
+#first 500 observations
+mp6 <- head(mp, 500)
+
+#dummies for distid using factor command
+m3 <- lm(math4 ~ expp + lunch + factor(distid), data = mp6)
+
+#checking that distid worked/that there is more than 1 distid coefficient
+tidy(m3)
+```
+
+```{r}
+#joint F test but I am not 100% sure this is correct since even though there are many levels of the dummy variable since I'm only writing in one variable for the argument it doesn't seem correct?
+library(car)
+
+#have to transform factor(distid) into a vector since I kept getting error messages
+vector <- m3$coefficients
+vector2 <- vector[-c(1:3)] #getting rid of the first 3 coefficients since they are not the dummy vars we're testing
+vector3 <- as.vector(vector2)
+
+#I keep getting the error 'non-conformable arguments' and the internet said it might be because I am using this as a vector instead of a matrix so I will try to convert this to a matrix and try again
+
+matrix <- m3$coefficients[4:length(m3$coefficients)]
+
+#that also didn't work. I'm just gonna try the messier version where I specify the "matrix" within the code
+
+linearHypothesis(m3, hypothesis.matrix = m3$coefficients, test = "F")
+
+#THAT WORKED !!!
+```
+Statistically significant!
+
+
+7. 
+```{r}
+library(fixest)
+```
+
+```{r}
+#feols command
+m4 <- feols(math4 ~ expp + lunch | distid, data = mp)
+tidy(m4)
+```
+
+8. Similar to the last one
+```{r}
+m5 <- feols(math4 ~ expp + lunch | distid + year, data = mp) #since SE clusters around the first fixed effect, since distid is the first one here we don't have to add any additional arguments
+tidy(m5)
+```
+
+
+9. 
+```{r}
+#using coef_map to specify the variables we want in the table
+modelsummary(models = list(m1, m2, m3, m4, m5),
+             coef_map = c('expp_demean',
+                          'lunch_demean',
+                          'expp',
+                          'lunch'))
+```
+
+The first interesting thing I'm noticing is that regardless of model (including the one where we have the 'demean' version of each coefficient), the expp coefficient is close to (or equal to) zero so we can be pretty confident that there either is no effect from that variable or that the effect is very very small.
+
+The second interesting thing I'm noticing here is that the R2 and R2 adjusted are much higher for the last two models (with fixed effects), suggesting that the fixed effects had a large influence on how much these models were able to explain the variability within the dependent variable.
+
+
+10. 
+```{r}
+#mutate to expp and lunch mean and have distid factor version
+mp10 <- mp5 %>% 
+  mutate(expp_mean= mean(expp), lunch_mean= mean(lunch), distid= factor(distid))
+
+m6 <- lmer(math4 ~ expp_demean + lunch_demean + expp_mean + lunch_mean | distid, data = mp10)
+modelsummary(m6)
+```
+
+
+
+
+
+
+
