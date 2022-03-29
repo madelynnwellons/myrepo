@@ -1,0 +1,218 @@
+---
+title: "Wellons_HW10SPRING"
+author: "Madelynn Wellons"
+date: "3/27/2022"
+output: html_document
+---
+
+
+Chapter 18- Conceptual Homework
+
+
+1. The assumption in no-control-group event studies is that the after-event effect is all due to the event (no other backdoor paths, or they are controlled for- this one I'm not 100% sure about since we didn't do the event study chapter)
+
+
+2. B, because the purpose of differences in differences is to measure the difference between the two groups after the time of treatment to just measure the effect of the treatment 
+
+
+3. 
+
+a- It means that, had the treated group not received a treatment, there would have been a difference between the treated and untreated groups during the post-treatment phase (since we know for sure that they have the same outcomes in the pre-treatment period, the violation in parallel trends must happen in the counterfactual post-treatment period)
+
+b- It varies for each situation, but one way to test this could be through determining what form of the dependent variable the parallel trend does hold for (in the book they examine the dependent variable in log form versus not log form, and one of those counterfactual versions still follows the parallel trends) and using that version to determine the difference between the original to see the difference in effect size
+
+
+4. 
+
+a- No, the pre-treatment lines were not parallel at all
+
+b- We would underestimate it, since the slope for the treated group pre-treatment was very small, and the comparative change post-treatment is much more drastic even though it is roughly equal to the slope of the untreated throughout
+
+
+5. No I don’t think so; even though parallel trends pre-treatment are valid, around May 2020 is when the US started to release a lot of their policies in conservative states, so then the “control” of the US would be having their own separate treatment
+
+
+6. 
+```{r}
+#treated difference
+9-5
+#untreated difference
+7.5-6
+
+#DID effect
+4-1.5
+```
+
+How is it performed?
+
+1. 
+
+a- iv (a set of fixed effects for state, and for year, and an interaction between "is 2016" and "is a treated state")
+
+b- The interaction between "is 2016" and "is a treated state"
+
+
+2. Assuming that the parallel trends assumption is followed, the effect of laptops on test scores was 9.15 (4.116+5.034, the coefficiencts for 'treated' and 'afterxtreated'), and this effect was statistically significant at the 95% level
+
+
+3. The prior trends test is performed in order to check the parallel trend assumption (to make sure the groups had the same rate of change in the pre-treatment period), since B3 is showing an interaction of time and treatment (if this is large/significant, then time and treatment condition are not independent).
+
+
+4. 
+
+a- The parallel trends assumption is violated (particularly at time 1, the slope is very different)
+
+b- Average of 3 time periods:
+```{r}
+(5+1+.5)/3
+```
+
+
+5. We don't know if the treatment is only going to effect one "time period"; therefore the already-treated control group may act differently after the other group is treated
+
+
+
+Coding
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(lme4)
+library(fixest)
+library(modelsummary)
+library(lubridate)
+```
+
+1. 
+```{r}
+#load data
+sr <- read.csv('https://raw.githubusercontent.com/NickCH-K/TheEffectAssignments/main/sourdough_trends.csv')
+```
+
+```{r}
+#limit to 3 variables
+sr <- sr %>% 
+  select(c('date', 'hits', 'keyword'))
+```
+
+```{r}
+#convert date to usable format
+sr <- sr %>% 
+  mutate(date = as.Date(date))
+```
+
+
+2. 
+```{r}
+#making graph and line for pandemic date
+startofpandemic <- as.Date('2020-03-15')
+
+ggplot(data = sr, aes(x = date, y = hits, color = keyword)) +
+  geom_line()+
+  geom_vline(xintercept = startofpandemic)
+```
+
+
+3.
+
+a- Yes, right after the line (marking the start of pandemic/lockdown), the number of hits for the keyword sourdough increased
+
+b- The effect seems largely temporary, but it is hard to tell based on the graph if the hits are still higher in July (when the trend is tapering off) than they were before the lockdown/pandemic line
+
+c- All of the other search terms are foods, and due to grocery store shortages, it is possible all foods (as opposed to other things that could be searched) could have increased numbers of searches- in addition, some of these foods are seasonal (e.g. 'soup' is usually eaten more in the winter, and since the pandemic began right as winter ended, the season may be a confounder for that control variable)
+
+
+4. 
+```{r}
+#treated indicator
+sr <- sr %>% 
+  mutate(treated = ifelse(keyword == 'sourdough', 1, 0))
+
+#new set for prior trends- filtering out dates after march 15th
+srmarch15 <- sr %>% 
+  filter(date < as.Date('2020-03-15'))
+```
+
+```{r}
+#glimpsed the new dataset to check and it all looks good, now will run prior trends test
+trendstest <- lm(hits ~ date*treated + date + treated, data = srmarch15)
+msummary(trendstest, stars = c('*' = .1, '**' = .05, '***' = .01))
+```
+
+Here we can see that the parallel trends assumption is not violated (interaction term of date and treated is not significant); we can now try this again by removing the soup group since we were concerned about the seasonality of that keyword
+```{r}
+srmarch15 <- srmarch15 %>% 
+  filter(keyword != 'soup')
+
+trendstest2 <- lm(hits ~ date*treated + date + treated, data = srmarch15)
+
+msummary(trendstest2, stars = c('*' = .1, '**' = .05, '***' = .01))
+```
+
+This is still following the parallel trends assumption since the coefficient is not significant!
+```{r}
+#removing soup from main dataset
+sr <- sr %>% 
+  filter(keyword != 'soup')
+```
+
+
+
+5. 
+```{r}
+#shifting date variable back 15 days, but 14 in code otherwise date is '0'
+sr <- sr %>% 
+  mutate(month=month(date-14))
+```
+
+```{r}
+#after variable
+sr <- sr %>% 
+  mutate(after = ifelse(date>as.Date('2020-03-14'), 1, 0))
+```
+
+```{r}
+glimpse(sr)
+```
+```{r}
+#not sure if I'm doing this mutation right since now jan/feb will be negative but hopefully this is correct!
+#subtracting 2 from month
+sr <- sr %>% 
+  mutate(month=month-2)
+#month 10 is jan1-14 so we can select that to become -2
+sr <- sr %>% 
+  mutate(month = if_else(month >9, -2, month))
+```
+
+```{r}
+#adding new treated variable to only count treatments in the 'after' period
+sr <- sr %>% 
+  mutate(treated2 = if_else(treated == 1 & after == 1, 1, 0))
+```
+
+```{r}
+#two way fixed effects with keyword and month as fixed effects
+fixed <- feols(hits ~ treated2 | keyword + month, data = sr)
+
+msummary(fixed, stars = c('*' = .1, '**' = .05, '***' = .01))
+```
+
+The DID estimate of lockdown on sourdough popularity is 8.4.
+
+
+6. 
+```{r}
+#DID model differing by month with 0 as the reference period
+m6 <- feols(hits ~ i(month, treated, ref = 0) | keyword + month, data = sr)
+
+msummary(m6, stars = c('*' = .1, '**' = .05, '***' = .01)) #sorry for the long table nico :( 
+```
+Here we can see that the coefficients are mostly significant (after 0), but it is months 1-3 that are significant at a 99% level
+
+
+7. 
+```{r}
+coefplot(m6)
+```
+
+This doesn't give me any concerns about prior trends violations, since before the treatment the 0 effect line is well within the confidence interval, so it does not seem as though there was a significant difference. This plot seems to show that months 1-3 showed a large increase in sourdough searches, and this effect decreased in months 4-5, but still remained higher than the control groups effect based on the treatment.
